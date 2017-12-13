@@ -3,7 +3,7 @@ module.exports = class Grid {
         constructor(x, y, grid) {
             this.x = x || 0;
             this.y = y || 0;
-            this.grid = grid || new Map().set(0, new Map().set(0, 0));
+            this.grid = grid || new Map().set(0, new Map().set(0, true));
             this.grid.set(this.x, new Map().set(this.y, true));
         }
 
