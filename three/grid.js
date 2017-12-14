@@ -4,7 +4,15 @@ module.exports = class Grid {
             this.x = x || 0;
             this.y = y || 0;
             this.grid = grid || new Map().set(0, new Map().set(0, true));
-            this.grid.set(this.x, new Map().set(this.y, true));
+            this.updateGrid();
+        }
+
+        updateGrid() {
+            if (this.grid.has(this.x)) {
+                this.grid.get(this.x).set(this.y, true);
+            } else {
+                this.grid.set(this.x, new Map().set(this.y, true));
+            }
         }
 
         left() {
@@ -24,22 +32,18 @@ module.exports = class Grid {
         }
     
         moveLeft() {
-            console.log('*left*');
             return new Grid(parseInt(this.x - 1), parseInt(this.y), this.grid);
         }
 
         moveRight() {
-            console.log('*right*');
             return new Grid(parseInt(this.x + 1), parseInt(this.y), this.grid);
         }
 
         moveUp() {
-            console.log('*up*');
             return new Grid(parseInt(this.x), parseInt(this.y - 1), this.grid);
         }
 
         moveDown() {
-            console.log('*down*');
             return new Grid(parseInt(this.x), parseInt(this.y + 1), this.grid);
         }
 
