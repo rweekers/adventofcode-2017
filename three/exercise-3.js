@@ -1,14 +1,23 @@
 const Rx = require('rxjs/Rx');
 const Grid = require('./grid');
 
-const number$ = Rx.Observable.range(0, 289326 + 1).skip(1);
+/* Silver */
 
-const steps = 289326;
+const steps2 = 289326;
+const steps = 3;
+const number$ = Rx.Observable.range(0, steps).skip(1);
 
 number$
-   .scan((acc, curr) => doMove(acc), new Grid()).take(steps - 1)
+   .reduce((acc, curr) => doMove(acc), new Grid())
    .map(grid => Math.abs(grid.getX()) + Math.abs(grid.getY()))
    .subscribe(console.log);
+
+/* Gold */
+number$
+    .scan((acc, curr) => doMove(acc), new Grid())
+    .map(grid => grid.getLastScore())
+    .subscribe(x => console.log('emit ' + x));
+
 
 function doMove(grid) {
     // default movement is to the right, always try to turn left
