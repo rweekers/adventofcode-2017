@@ -7,7 +7,7 @@ import org.junit.Test
 class Exercise4Test {
 
     @Test
-    fun firstTest() {
+    fun exercise4SilverTest() {
         Assert.assertTrue(1 == 1)
     }
 
