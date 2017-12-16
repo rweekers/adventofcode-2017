@@ -8,7 +8,8 @@ module.exports = class Grid {
         }
 
         updateGrid() {
-            this.lastScore = this.getAdjacentScore();
+            // console.log('updating grid');
+            this.lastScore = this.getAdjacentScores();
             if (this.grid.has(this.x)) {
                 this.grid.get(this.x).set(this.y, this.lastScore);
             } else {
@@ -33,18 +34,22 @@ module.exports = class Grid {
         }
     
         moveLeft() {
+            console.log('*left*');
             return new Grid(parseInt(this.x - 1), parseInt(this.y), this.grid);
         }
 
         moveRight() {
+            console.log('*right*');
             return new Grid(parseInt(this.x + 1), parseInt(this.y), this.grid);
         }
 
         moveUp() {
+            console.log('*up*');
             return new Grid(parseInt(this.x), parseInt(this.y - 1), this.grid);
         }
 
         moveDown() {
+            console.log('*down*');
             return new Grid(parseInt(this.x), parseInt(this.y + 1), this.grid);
         }
 
@@ -60,7 +65,7 @@ module.exports = class Grid {
             return this.lastScore;
         }
 
-        getAdjacentScore() {
+        getAdjacentScores() {
             let score = 0;
             let x = this.x - 1;
             let y = this.y - 1;
@@ -72,7 +77,7 @@ module.exports = class Grid {
                         y++;
                         return 0;
                     }
-                    console.log('adjacent field')
+                    // console.log('adjacent field')
                     score += this.getFieldScore(x, y);
                     y++;
                 }
@@ -83,12 +88,12 @@ module.exports = class Grid {
         }
 
         getFieldScore(x, y) {
-            console.log('get field score for x ' + x + ' and y ' + y);
+            // console.log('get field score for x ' + x + ' and y ' + y);
             if (this.grid === undefined) {
                 return 0;
             }
             if (this.grid.has(x) && this.grid.get(x).has(y)) {
-                console.log('score ' + this.grid.get(x).get(y));
+                // console.log('score ' + this.grid.get(x).get(y));
                 return this.grid.get(x).get(y);
             }
             return 0;
