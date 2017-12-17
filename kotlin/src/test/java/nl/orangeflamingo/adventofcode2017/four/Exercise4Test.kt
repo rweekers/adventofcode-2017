@@ -8,9 +8,9 @@ class Exercise4Test {
 
     @Test
     fun exercise4SilverTest() {
-        val exc4 = Exercise4();
-        exc4.exercise4("tbd");
-        Assert.assertTrue(1 == 1)
+        val exc4 = Exercise4()
+        val answer = exc4.exercise4("/test.txt")
+        Assert.assertEquals(2, answer)
     }
 
 }
