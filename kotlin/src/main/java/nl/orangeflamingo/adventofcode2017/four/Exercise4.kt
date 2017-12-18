@@ -25,8 +25,8 @@ class Exercise4() {
         var originalLenght = 0
         var distinctLength = 0
 
-        wordStream.reduce(0, {acc, curr -> acc + 1}).subscribe({a -> originalLenght = a})
-        distinctWordStream.reduce(0, {acc, curr -> acc + 1}).subscribe({a -> distinctLength = a})
+        wordStream.reduce(0, {acc, _ -> acc + 1}).subscribe({a -> originalLenght = a})
+        distinctWordStream.reduce(0, {acc, _ -> acc + 1}).subscribe({a -> distinctLength = a})
 
         return(originalLenght == distinctLength)
     }
