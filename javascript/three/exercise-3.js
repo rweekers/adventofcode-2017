@@ -4,13 +4,13 @@ const Grid = require('./grid');
 /* Silver */
 
 const steps2 = 289326;
-const steps = 3;
+const steps = 7;
 const number$ = Rx.Observable.range(0, steps).skip(1);
 
-number$
-   .reduce((acc, curr) => doMove(acc), new Grid())
-   .map(grid => Math.abs(grid.getX()) + Math.abs(grid.getY()))
-   .subscribe(console.log);
+// number$
+//    .reduce((acc, curr) => doMove(acc), new Grid())
+//    .map(grid => Math.abs(grid.getX()) + Math.abs(grid.getY()))
+//    .subscribe(console.log);
 
 /* Gold */
 number$

@@ -3,12 +3,14 @@ module.exports = class Grid {
         constructor(x, y, grid) {
             this.x = x || 0;
             this.y = y || 0;
-            this.grid = grid || new Map().set(0, new Map().set(0, 0));
+            this.grid = grid || new Map().set(0, new Map().set(0, 1));
             this.updateGrid();
         }
 
         updateGrid() {
-            // console.log('updating grid');
+            if (this.x == 0 && this.y == 0) {
+                return;
+            }
             this.lastScore = this.getAdjacentScores();
             if (this.grid.has(this.x)) {
                 this.grid.get(this.x).set(this.y, this.lastScore);
@@ -34,22 +36,18 @@ module.exports = class Grid {
         }
     
         moveLeft() {
-            console.log('*left*');
             return new Grid(parseInt(this.x - 1), parseInt(this.y), this.grid);
         }
 
         moveRight() {
-            console.log('*right*');
             return new Grid(parseInt(this.x + 1), parseInt(this.y), this.grid);
         }
 
         moveUp() {
-            console.log('*up*');
             return new Grid(parseInt(this.x), parseInt(this.y - 1), this.grid);
         }
 
         moveDown() {
-            console.log('*down*');
             return new Grid(parseInt(this.x), parseInt(this.y + 1), this.grid);
         }
 
@@ -73,12 +71,11 @@ module.exports = class Grid {
             const endY = this.y + 1;
             while (x <= endX) {
                 while (y <= endY) {
-                    if (x == 0 && y == 0) {
-                        y++;
-                        return 0;
+                    let fieldScore = this.getFieldScore(x, y);
+                    if (x == this.x && y == this.y) {
+                        fieldScore = 0;
                     }
-                    // console.log('adjacent field')
-                    score += this.getFieldScore(x, y);
+                    score += fieldScore;
                     y++;
                 }
                 y = -1;
@@ -88,12 +85,10 @@ module.exports = class Grid {
         }
 
         getFieldScore(x, y) {
-            // console.log('get field score for x ' + x + ' and y ' + y);
             if (this.grid === undefined) {
                 return 0;
             }
             if (this.grid.has(x) && this.grid.get(x).has(y)) {
-                // console.log('score ' + this.grid.get(x).get(y));
                 return this.grid.get(x).get(y);
             }
             return 0;
