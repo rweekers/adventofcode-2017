@@ -78,7 +78,7 @@ module.exports = class Grid {
                     score += fieldScore;
                     y++;
                 }
-                y = -1;
+                y = this.y - 1;
                 x++;
             }
             return score;
