@@ -5,32 +5,55 @@ import java.io.InputStream
 
 class Exercise4() {
 
-    fun exercise4(file: String): Int {
-        val inputStream: InputStream = this.javaClass.getResource(file).openStream();
-        val lineList = mutableListOf<String>()
+    fun silverExercise4(file: String): Int {
         var correctPassphrases = 0
 
-        inputStream.bufferedReader().useLines { lines -> lines.forEach { lineList.add(it)} }
-        lineList.forEach{
-            if (isValidPassphrase(it)) correctPassphrases++
+        setupLineList(file).forEach{
+            if (isValidSilverPassphrase(it)) correctPassphrases++
         }
         return correctPassphrases
     }
 
-    private fun isValidPassphrase(line: String): Boolean {
+    fun goldExercise4(file: String): Int {
+        var correctPassphrases = 0
+
+        setupLineList(file).forEach{
+            if (isValidGoldPassphrase(it)) correctPassphrases++
+        }
+        return correctPassphrases
+    }
+
+    private fun setupLineList(file: String): List<String> {
+        val inputStream: InputStream = this.javaClass.getResource(file).openStream();
+        val lineList = mutableListOf<String>()
+
+        inputStream.bufferedReader().useLines { lines -> lines.forEach { lineList.add(it)} }
+
+        return lineList
+    }
+
+    private fun isValidGoldPassphrase(line: String): Boolean {
+        val words = line.split(" ")
+        var validPassphase = true
+
+        val wordStream = words.toObservable()
+        wordStream
+                .filter( { word -> frequency(words, word) > 1 } )
+                .subscribe( { x -> validPassphase = false } )
+
+        return validPassphase
+    }
+
+    private fun isValidSilverPassphrase(line: String): Boolean {
         val words = line.split(" ")
 
         val wordStream = words.toObservable()
-
-        // TODO
-        val distinctGoldWordStream = wordStream;
-
-        val distinctWordStream = words.toObservable().distinct()
+        val distinctStream = words.toObservable().distinct()
         var originalLenght = 0
         var distinctLength = 0
 
         wordStream.reduce(0, {acc, _ -> acc + 1}).subscribe({a -> originalLenght = a})
-        distinctWordStream.reduce(0, {acc, _ -> acc + 1}).subscribe({a -> distinctLength = a})
+        distinctStream.reduce(0, {acc, _ -> acc + 1}).subscribe({a -> distinctLength = a})
 
         return(originalLenght == distinctLength)
     }
@@ -43,11 +66,20 @@ class Exercise4() {
 
         wordList1.forEach({c -> if (wordList2.contains(c)) wordList2.remove(c) else return false })
 
-        return true;
+        return true
+    }
+
+    private fun frequency(theList: List<String>, theObject: String): Int {
+        var result = 0
+        for (e in theList)
+            if (isWordEqual(theObject, e))
+                result++
+        return result
     }
 }
 
 fun main(args: Array<String>) {
     val exc4 = Exercise4()
-    println("Total correct passphrases: " + exc4.exercise4("/input.txt"))
+    println("Total correct silver passphrases: " + exc4.silverExercise4("/input.txt"))
+    println("Total correct gold passphrases: " + exc4.goldExercise4("/input.txt"))
 }
