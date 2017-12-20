@@ -3,7 +3,7 @@ package nl.orangeflamingo.adventofcode2017.four
 import io.reactivex.rxkotlin.toObservable
 import java.io.InputStream
 
-class Exercise4() {
+class Exercise4 {
 
     fun silverExercise4(file: String): Int {
         var correctPassphrases = 0
@@ -80,6 +80,7 @@ class Exercise4() {
 
 fun main(args: Array<String>) {
     val exc4 = Exercise4()
-    println("Total correct silver passphrases: " + exc4.silverExercise4("/input.txt"))
-    println("Total correct gold passphrases: " + exc4.goldExercise4("/input.txt"))
+    val fileName = "/input4.txt"
+    println("Total correct silver passphrases: " + exc4.silverExercise4(fileName))
+    println("Total correct gold passphrases: " + exc4.goldExercise4(fileName))
 }
