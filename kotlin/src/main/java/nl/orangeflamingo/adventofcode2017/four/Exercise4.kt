@@ -24,7 +24,7 @@ class Exercise4() {
     }
 
     private fun setupLineList(file: String): List<String> {
-        val inputStream: InputStream = this.javaClass.getResource(file).openStream();
+        val inputStream: InputStream = this.javaClass.getResource(file).openStream()
         val lineList = mutableListOf<String>()
 
         inputStream.bufferedReader().useLines { lines -> lines.forEach { lineList.add(it)} }
@@ -34,14 +34,14 @@ class Exercise4() {
 
     private fun isValidGoldPassphrase(line: String): Boolean {
         val words = line.split(" ")
-        var validPassphase = true
+        var validPassphrase = true
 
         val wordStream = words.toObservable()
         wordStream
                 .filter( { word -> frequency(words, word) > 1 } )
-                .subscribe( { x -> validPassphase = false } )
+                .subscribe( { _ -> validPassphrase = false } )
 
-        return validPassphase
+        return validPassphrase
     }
 
     private fun isValidSilverPassphrase(line: String): Boolean {
@@ -61,8 +61,8 @@ class Exercise4() {
     private fun isWordEqual(word1: String, word2: String): Boolean {
         if (word1.length != word2.length) return false
 
-        var wordList1 : List<Char> = word1.toList()
-        var wordList2: MutableList<Char> = word2.toMutableList()
+        val wordList1 : List<Char> = word1.toList()
+        val wordList2: MutableList<Char> = word2.toMutableList()
 
         wordList1.forEach({c -> if (wordList2.contains(c)) wordList2.remove(c) else return false })
 
