@@ -9,7 +9,15 @@ class Exercise6Test {
     @Test
     fun exercise6SilverTest() {
         val exc6 = Exercise6()
-        val answer = exc6.silverExercise5("/test6.txt")
-        Assert.assertEquals(0, answer)
+        val answer = exc6.silverExercise6("/test6.txt")
+        Assert.assertEquals(5, answer)
+    }
+
+    @Test
+    fun exercise6GoldTest() {
+        val exc6 = Exercise6()
+        exc6.silverExercise6("/test6.txt")
+        val answer = exc6.goldExercise6()
+        Assert.assertEquals(4, answer)
     }
 }
