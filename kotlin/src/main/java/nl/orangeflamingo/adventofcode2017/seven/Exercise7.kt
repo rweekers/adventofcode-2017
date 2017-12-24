@@ -1,11 +1,8 @@
-package nl.orangeflamingo.adventofcode2017.five
+package nl.orangeflamingo.adventofcode2017.seven
 
-import io.reactivex.rxkotlin.toObservable
 import java.io.InputStream
 
 class Exercise7 {
-
-    // private val tree: Node<String> = Node()
 
     private fun linesAsList(file: String): MutableList<String> {
         val inputStream: InputStream = this.javaClass.getResource(file).openStream()
@@ -16,25 +13,14 @@ class Exercise7 {
     }
 
     fun silverExercise7(file: String): String {
-        parseInput(file)
-        val list = linesAsList(file)
-        val baseList = mutableListOf<String>()
-        var totalString = ""
-        var solution = ""
-        list.toObservable().subscribe( { x ->
-            baseList.add(x.substring(0, x.indexOf(" ")))
-            val rest = x.substring(x.indexOf(" "))
-            totalString = "$totalString$rest"
-        } )
-        baseList.forEach( { x -> if (totalString.indexOf(x) == -1) solution = x } )
-        return solution
+        return parseInput(file)
     }
 
-    fun parseInput(file: String) {
+    fun parseInput(file: String): String {
         val list = linesAsList(file)
         val nodesByName = mutableMapOf<String, Node>()
-        // TODO replace
-        val parentChildPairs = mutableMapOf<String, String>()
+
+        val parentChildPairs = mutableSetOf<Pair<Node, String>>()
         val regExp = """\w+""".toRegex()
         list.forEach( { it ->
             val parts = regExp.findAll(it).toList().map { it.value }
@@ -42,24 +28,33 @@ class Exercise7 {
             nodesByName.put(node.name, node)
 
             parts.drop(2).forEach {
-                parentChildPairs.put(parts[0], it)
+                parentChildPairs.add(Pair(node, it))
             }
         } )
-
-        parentChildPairs.forEach { (parentName, childName) ->
-            nodesByName[parentName]!!.children.add(nodesByName[childName]!!)
+        
+        parentChildPairs.forEach { (parent, childName) ->
+            with(nodesByName.getValue(childName)) {
+                parent.children.add(this)
+                this.parent = parent
+            }
         }
 
-        println("OK")
+        val rootNode = nodesByName.values.firstOrNull { it.parent == null }
+                ?: throw RuntimeException("Head node appears to not be there")
+
+        return rootNode.name
     }
 }
 
 data class Node(val name: String, val value: Int
                 , val children: MutableList<Node> = mutableListOf(), var parent: Node? = null) {
 
+    override fun toString(): String {
+        return this.name
+    }
 }
 
 fun main(args: Array<String>) {
-    val answerSilver = Exercise7().silverExercise7("/test7.txt")
+    val answerSilver = Exercise7().silverExercise7("/input7.txt")
     println("The base element for the silver exercise is: $answerSilver")
 }

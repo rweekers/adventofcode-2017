@@ -1,4 +1,4 @@
-package nl.orangeflamingo.adventofcode2017.five
+package nl.orangeflamingo.adventofcode2017.seven
 
 import org.junit.Assert
 import org.junit.Test
