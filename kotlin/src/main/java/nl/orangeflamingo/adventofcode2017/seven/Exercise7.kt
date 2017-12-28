@@ -1,8 +1,11 @@
 package nl.orangeflamingo.adventofcode2017.seven
 
 import java.io.InputStream
+import kotlin.math.absoluteValue
 
-class Exercise7 {
+class Exercise7 (fileName: String) {
+
+    private val rootNode = parseInput(fileName)
 
     private fun linesAsList(file: String): MutableList<String> {
         val inputStream: InputStream = this.javaClass.getResource(file).openStream()
@@ -12,11 +15,15 @@ class Exercise7 {
         return lineList
     }
 
-    fun silverExercise7(file: String): String {
-        return parseInput(file)
+    fun silverExercise7(): String {
+        return rootNode.name
     }
 
-    fun parseInput(file: String): String {
+    fun goldExercise7(): Pair<String, Int> {
+        return rootNode.findDifferenceInValue()
+    }
+
+    fun parseInput(file: String): Node {
         val list = linesAsList(file)
         val nodesByName = mutableMapOf<String, Node>()
 
@@ -38,23 +45,39 @@ class Exercise7 {
                 this.parent = parent
             }
         }
-
-        val rootNode = nodesByName.values.firstOrNull { it.parent == null }
+        return nodesByName.values.firstOrNull { it.parent == null }
                 ?: throw RuntimeException("Head node appears to not be there")
-
-        return rootNode.name
     }
 }
 
-data class Node(val name: String, val value: Int
+data class Node(val name: String, private val value: Int
                 , val children: MutableList<Node> = mutableListOf(), var parent: Node? = null) {
 
-    override fun toString(): String {
-        return this.name
+    private fun getTotalValue(): Int {
+        var totalValue = this.value
+        this.children.forEach { totalValue += it.getTotalValue() }
+        return totalValue
+    }
+
+    fun findDifferenceInValue(wrongValue: Int? = null): Pair<String, Int> =
+            if (wrongValue != null && childrenHaveEqualValue()) {
+                Pair(name, value - wrongValue)
+            } else {
+                val childrenByValue = children.groupBy { it.getTotalValue() }
+                val wrongValueNode = childrenByValue.minBy { it.value.size }?.value?.first()
+                        ?: throw RuntimeException("No balanced children should be there")
+                wrongValueNode.findDifferenceInValue(wrongValue ?: childrenByValue.keys.reduce { a, b -> a - b }.absoluteValue)
+            }
+
+    private fun childrenHaveEqualValue(): Boolean {
+        return children.map { it.getTotalValue() }.distinct().size == 1
     }
 }
 
 fun main(args: Array<String>) {
-    val answerSilver = Exercise7().silverExercise7("/input7.txt")
+    val exc7 = Exercise7("/input7.txt")
+    val answerSilver = exc7.silverExercise7()
     println("The base element for the silver exercise is: $answerSilver")
+    val answerGold = exc7.goldExercise7()
+    println("The correction value for the gold exercise is ${answerGold.second} for node ${answerGold.first}")
 }
