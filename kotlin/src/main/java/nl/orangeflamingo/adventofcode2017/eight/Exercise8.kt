@@ -5,6 +5,7 @@ import java.io.InputStream
 class Exercise8 (fileName: String) {
 
     private val register = HashMap<String, Int>()
+    private var maxValue = 0
 
     init {
         parseInput(fileName)
@@ -18,26 +19,46 @@ class Exercise8 (fileName: String) {
         return lineList
     }
 
-    fun silverExercise8(): String {
-        return register.toString()
+    fun silverExercise8(): Int {
+        return register.maxBy { it.value }!!.value
     }
 
-    fun parseInput(file: String): Map<String, Int> {
+    fun goldExercise8(): Int {
+        return maxValue
+    }
+
+    private fun parseInput(file: String): Map<String, Int> {
         val list = linesAsList(file)
 
         val regExp = """\S+""".toRegex()
         list.forEach( { it ->
             val parts = regExp.findAll(it).toList().map { it.value }
-            val element = parts[0]
             val addition = giveAddition(parts[1], parts[2].toInt())
-            val predicate = parts[4] + parts[5] + parts[6]
-            println("${it} is divided into element ${element} with addition ${addition} and predicate ${predicate}")
+            val predicate = processPredicate(getValue(parts[4]), parts[5], parts[6].toInt())
+            if (predicate) register[parts[0]] = getValue(parts[0]) + addition
+            maxValue = if (!register.isEmpty() && register.maxBy { it.value }!!.value > maxValue) register.maxBy { it.value }!!.value else maxValue
         } )
         return register
     }
 
-    private fun updateRegisterValue(reg: String, predicate: String, addition: Int) {
-        //
+    private fun getValue(key: String): Int {
+        return if (register.containsKey(key)) register.getValue(key) else 0
+    }
+
+    private fun processPredicate(value: Int, comparisonOperator: String, compareValue: Int): Boolean {
+        var answer = false
+        when (comparisonOperator) {
+            ">" -> answer = value > compareValue
+            ">=" -> answer = value >= compareValue
+            "<" -> answer = value < compareValue
+            "<=" -> answer = value <= compareValue
+            "==" -> answer = value == compareValue
+            "!=" -> answer = value != compareValue
+            else -> { // Note the block
+                RuntimeException("Unexpected comparison operator")
+            }
+        }
+        return answer
     }
 
     private fun giveAddition(action: String, amount: Int): Int {
@@ -46,7 +67,9 @@ class Exercise8 (fileName: String) {
 }
 
 fun main(args: Array<String>) {
-    val exc8 = Exercise8("/test8.txt")
+    val exc8 = Exercise8("/input8.txt")
     val answerSilver = exc8.silverExercise8()
-    println("The base element for the silver exercise is: $answerSilver")
+    println("The largest value after running the operations for the silver exercise is: $answerSilver")
+    val answerGold = exc8.goldExercise8()
+    println("The largest value found after running the operations for the gold exercise is: $answerGold")
 }
