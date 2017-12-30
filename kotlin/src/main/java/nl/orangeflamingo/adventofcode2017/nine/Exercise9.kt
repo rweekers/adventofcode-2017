@@ -1,5 +1,6 @@
 package nl.orangeflamingo.adventofcode2017.nine
 
+import io.reactivex.rxkotlin.toObservable
 import java.io.InputStream
 
 class Exercise8 (fileName: String) {
@@ -8,6 +9,9 @@ class Exercise8 (fileName: String) {
 
     fun silverExercise9(): String {
         // fix reactive?
+        cleanedInput.asIterable().toObservable()
+                .scan( "<seed class>", {acc, cur -> acc } )
+                .subscribe( { println(it) })
         return cleanedInput
     }
 
@@ -30,7 +34,7 @@ class Exercise8 (fileName: String) {
 }
 
 fun main(args: Array<String>) {
-    val exc8 = Exercise8("/input9.txt")
+    val exc8 = Exercise8("/test9.txt")
     val answerSilver = exc8.silverExercise9()
     println("The largest value after running the operations for the silver exercise is: $answerSilver")
 }
