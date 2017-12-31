@@ -1,4 +1,4 @@
-package nl.orangeflamingo.adventofcode2017.four
+package nl.orangeflamingo.adventofcode2017
 
 import io.reactivex.rxkotlin.toObservable
 import java.io.InputStream
@@ -80,7 +80,7 @@ class Exercise4 {
 
 fun main(args: Array<String>) {
     val exc4 = Exercise4()
-    val fileName = "/input4.txt"
+    val fileName = "/input/input4.txt"
     println("Total correct silver passphrases: " + exc4.silverExercise4(fileName))
     println("Total correct gold passphrases: " + exc4.goldExercise4(fileName))
 }

@@ -1,4 +1,4 @@
-package nl.orangeflamingo.adventofcode2017.six
+package nl.orangeflamingo.adventofcode2017
 
 import java.io.InputStream
 import java.lang.Integer.parseInt
@@ -76,7 +76,7 @@ class Exercise6 {
 
 fun main(args: Array<String>) {
     val exc6 = Exercise6()
-    val numberOfStepsSilver = exc6.silverExercise6("/input6.txt")
+    val numberOfStepsSilver = exc6.silverExercise6("/input/input6.txt")
     println("Total correct silver number of steps: $numberOfStepsSilver")
     val answerGold = exc6.goldExercise6()
     println("Total correct gold number of steps: $answerGold")
