@@ -65,6 +65,36 @@ class Exercise9Test {
     @Test
     fun exercise9bGoldTest() {
         val answer = Exercise9("/test/test9-gold-b.txt").goldExercise9()
+        Assert.assertEquals(17, answer)
+    }
+
+    @Test
+    fun exercise9cGoldTest() {
+        val answer = Exercise9("/test/test9-gold-c.txt").goldExercise9()
+        Assert.assertEquals(3, answer)
+    }
+
+    @Test
+    fun exercise9dGoldTest() {
+        val answer = Exercise9("/test/test9-gold-d.txt").goldExercise9()
+        Assert.assertEquals(2, answer)
+    }
+
+    @Test
+    fun exercise9eGoldTest() {
+        val answer = Exercise9("/test/test9-gold-e.txt").goldExercise9()
         Assert.assertEquals(0, answer)
+    }
+
+    @Test
+    fun exercise9fGoldTest() {
+        val answer = Exercise9("/test/test9-gold-f.txt").goldExercise9()
+        Assert.assertEquals(0, answer)
+    }
+
+    @Test
+    fun exercise9bGolgTest() {
+        val answer = Exercise9("/test/test9-gold-g.txt").goldExercise9()
+        Assert.assertEquals(10, answer)
     }
 }

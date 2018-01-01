@@ -20,7 +20,8 @@ class Exercise9(fileName: String) {
     }
 
     fun goldExercise9(): Int {
-        return 0
+        val garbageGroups = garbage.findAll(cleanedInput)
+        return garbageGroups.sumBy { it.value.length - 2 }
     }
 
     private fun linesAsList(file: String): MutableList<String> {
