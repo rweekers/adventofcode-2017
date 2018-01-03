@@ -8,7 +8,7 @@ class Exercise10Test {
 
     @Test
     fun exercise10SilverTest() {
-        val answer = Exercise10("/test/test10.txt").silverExercise10()
+        val answer = Exercise10("/test/ten/test10.txt", 5).silverExercise10()
         Assert.assertEquals(0, answer)
     }
 }

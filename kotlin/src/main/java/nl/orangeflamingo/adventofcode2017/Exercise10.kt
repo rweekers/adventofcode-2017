@@ -2,24 +2,19 @@ package nl.orangeflamingo.adventofcode2017
 
 import java.io.InputStream
 
-class Exercise10(fileName: String) {
+class Exercise10(fileName: String, length: Int) {
 
-    private val cleanedInput = parseAndCleanInput(fileName)
+    private val inputLengths = parseAndCleanInput(fileName)
+    private val circularList = CircularList(length)
 
     fun silverExercise10(): Int {
-        cleanedInput.forEach({println(it)})
+        inputLengths.forEach { doWork(it) }
         return 0
     }
 
-    private fun getSublist(startIndex: Int, length: Int): IntArray {
-        return IntArray(5)
+    private fun doWork(inputLength: Int) {
+        circularList.reverseSublist(inputLength)
     }
-
-    private fun replaceSublist(startIndex: Int, length: Int) {
-
-    }
-
-    // TODO create class that contains arraylist and specific methods (and currentIndex)
 
     private fun linesAsList(file: String): MutableList<String> {
         val inputStream: InputStream = this.javaClass.getResource(file).openStream()
@@ -34,8 +29,46 @@ class Exercise10(fileName: String) {
     }
 }
 
+data class CircularList(private val length: Int) {
+
+    private val theList = IntArray(length, { i -> i })
+    private var currentIndex = 0
+    private var skip = 0
+
+    fun reverseSublist(length: Int) {
+        val subListReversed = getSublist(length).reversedArray()
+        replaceSublist(length, subListReversed)
+    }
+
+    private fun getSublist(length: Int): IntArray {
+        if (currentIndex + length <= theList.size) {
+            return theList.sliceArray(IntRange(currentIndex, currentIndex + length - 1))
+        }
+        val lastPart = theList.sliceArray(IntRange(currentIndex, theList.size - 1))
+        val firstPart = theList.sliceArray(IntRange(0, currentIndex + length % theList.size))
+        return firstPart.plus(lastPart)
+    }
+
+    private fun replaceSublist(length: Int, subListReversed: IntArray) {
+        var index = currentIndex
+        subListReversed.forEach {
+            theList[getCircularIndex(index)] = it
+            index++
+        }
+        currentIndex += length + skip
+        skip++
+    }
+
+    private fun getCircularIndex(index: Int): Int {
+        if (index >= theList.size) {
+            return index % theList.size
+        }
+        return index
+    }
+}
+
 fun main(args: Array<String>) {
-    val exc10 = Exercise10("/input/input10.txt")
+    val exc10 = Exercise10("/input/input10.txt", 5)
     val answerSilver = exc10.silverExercise10()
     println("The answer for the silver exercise is: $answerSilver")
 }

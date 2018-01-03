@@ -8,14 +8,14 @@ class Exercise7Test {
 
     @Test
     fun exercise7SilverTest() {
-        val exc7 = Exercise7("/test/test7.txt")
+        val exc7 = Exercise7("/test/seven/test7.txt")
         val answer = exc7.silverExercise7()
         Assert.assertEquals("tknk", answer)
     }
 
     @Test
     fun exercise7GoldTest() {
-        val exc7 = Exercise7("/test/test7.txt")
+        val exc7 = Exercise7("/test/seven/test7.txt")
         val answer = exc7.goldExercise7()
         Assert.assertEquals(60, answer.second)
     }
