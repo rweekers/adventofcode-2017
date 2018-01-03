@@ -11,9 +11,15 @@ class Exercise10(fileName: String) {
         return 0
     }
 
-    private fun reverseSublist(index: Int, length: Int) {
+    private fun getSublist(startIndex: Int, length: Int): IntArray {
+        return IntArray(5)
+    }
+
+    private fun replaceSublist(startIndex: Int, length: Int) {
 
     }
+
+    // TODO create class that contains arraylist and specific methods (and currentIndex)
 
     private fun linesAsList(file: String): MutableList<String> {
         val inputStream: InputStream = this.javaClass.getResource(file).openStream()
