@@ -9,7 +9,7 @@ class Exercise10(fileName: String, length: Int) {
 
     fun silverExercise10(): Int {
         inputLengths.forEach { doWork(it) }
-        return 0
+        return circularList.getScore()
     }
 
     private fun doWork(inputLength: Int) {
@@ -40,13 +40,17 @@ data class CircularList(private val length: Int) {
         replaceSublist(length, subListReversed)
     }
 
+    fun getScore(): Int {
+        return theList[0] * theList[1]
+    }
+
     private fun getSublist(length: Int): IntArray {
         if (currentIndex + length <= theList.size) {
             return theList.sliceArray(IntRange(currentIndex, currentIndex + length - 1))
         }
         val lastPart = theList.sliceArray(IntRange(currentIndex, theList.size - 1))
-        val firstPart = theList.sliceArray(IntRange(0, currentIndex + length % theList.size))
-        return firstPart.plus(lastPart)
+        val firstPart = theList.sliceArray(IntRange(0, ((currentIndex + length) % theList.size) - 1))
+        return lastPart.plus(firstPart)
     }
 
     private fun replaceSublist(length: Int, subListReversed: IntArray) {
@@ -55,7 +59,7 @@ data class CircularList(private val length: Int) {
             theList[getCircularIndex(index)] = it
             index++
         }
-        currentIndex += length + skip
+        currentIndex = getCircularIndex(currentIndex + length + skip)
         skip++
     }
 
@@ -68,7 +72,7 @@ data class CircularList(private val length: Int) {
 }
 
 fun main(args: Array<String>) {
-    val exc10 = Exercise10("/input/input10.txt", 5)
+    val exc10 = Exercise10("/input/input10.txt", 256)
     val answerSilver = exc10.silverExercise10()
     println("The answer for the silver exercise is: $answerSilver")
 }
