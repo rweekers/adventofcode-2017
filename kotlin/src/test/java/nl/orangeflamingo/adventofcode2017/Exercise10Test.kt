@@ -11,4 +11,5 @@ class Exercise10Test {
         val answer = Exercise10("/test/ten/test10.txt", 5).silverExercise10()
         Assert.assertEquals(12, answer)
     }
+
 }

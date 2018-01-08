@@ -1,19 +1,31 @@
 package nl.orangeflamingo.adventofcode2017
 
+import io.reactivex.rxkotlin.toObservable
 import java.io.InputStream
 
 class Exercise10(fileName: String, length: Int) {
 
-    private val inputLengths = parseAndCleanInput(fileName)
-    private val circularList = CircularList(length)
+    private val inputLengthsSilver = parseAndCleanInputExcSilver(fileName)
+    private val inputLengthsGold = parseAndCleanInputExcGold(fileName)
+    private val circularListSilver = CircularList(length)
+    private val circularListGold = CircularList(length)
 
     fun silverExercise10(): Int {
-        inputLengths.forEach { doWork(it) }
-        return circularList.getScore()
+        inputLengthsSilver.forEach { doWorkSilver(it) }
+        return circularListSilver.getScoreSilver()
     }
 
-    private fun doWork(inputLength: Int) {
-        circularList.reverseSublist(inputLength)
+    fun goldExercise10(): String {
+        repeat(64, { inputLengthsGold.forEach { doWorkGold(it) } })
+        return circularListGold.getScoreGold()
+    }
+
+    private fun doWorkSilver(inputLength: Int) {
+        circularListSilver.reverseSublist(inputLength)
+    }
+
+    private fun doWorkGold(inputLength: Int) {
+        circularListGold.reverseSublist(inputLength)
     }
 
     private fun linesAsList(file: String): MutableList<String> {
@@ -24,8 +36,12 @@ class Exercise10(fileName: String, length: Int) {
         return lineList
     }
 
-    private fun parseAndCleanInput(file: String): IntArray {
+    private fun parseAndCleanInputExcSilver(file: String): IntArray {
         return linesAsList(file).first().split(",").map { it.trim().toInt() }.toIntArray()
+    }
+
+    private fun parseAndCleanInputExcGold(file: String): IntArray {
+        return linesAsList(file).first().map { it.toInt() }.plus(listOf(17, 31, 73, 47, 23)).toIntArray()
     }
 }
 
@@ -40,8 +56,27 @@ data class CircularList(private val length: Int) {
         replaceSublist(length, subListReversed)
     }
 
-    fun getScore(): Int {
+    fun getScoreSilver(): Int {
         return theList[0] * theList[1]
+    }
+
+    fun getScoreGold(): String {
+        var denseHash = String()
+        theList.toObservable()
+                .buffer(16)
+                .map( { a -> hashify(a) } )
+                .reduce( { acc, cur -> acc + cur } )
+                .subscribe( { x -> denseHash = x } )
+        return denseHash
+    }
+
+    private fun hashify(list: List<Int>): String {
+        var hash = String()
+        list.toObservable()
+                .reduce( { acc, curr -> acc.xor(curr) } )
+                .map { x -> Integer.toHexString(x) }
+                .subscribe( { x -> hash = x } )
+        return hash
     }
 
     private fun getSublist(length: Int): IntArray {
@@ -75,4 +110,6 @@ fun main(args: Array<String>) {
     val exc10 = Exercise10("/input/input10.txt", 256)
     val answerSilver = exc10.silverExercise10()
     println("The answer for the silver exercise is: $answerSilver")
+    val answerGold = exc10.goldExercise10()
+    println("The answer for the gold exercise is: $answerGold")
 }
