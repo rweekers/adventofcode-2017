@@ -42,7 +42,7 @@ class Exercise12(fileName: String) {
 
 data class Program(val name: Int) {
 
-    private val connections = mutableListOf<Program>()
+    private val connections = mutableSetOf<Program>()
 
     fun addConnection(program: Program) {
         connections.add(program)
