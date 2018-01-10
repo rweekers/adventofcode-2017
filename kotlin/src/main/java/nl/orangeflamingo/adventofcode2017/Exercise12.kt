@@ -27,7 +27,9 @@ class Exercise12(fileName: String) {
                 programsByName.put(it.toInt(), program)
                 println(it)
             })
-        } )
+        })
+        val p = programsByName.getOrElse(0, { Program(0) })
+        p.getTotalConnections(p)
         return list
     }
 
@@ -46,6 +48,19 @@ data class Program(val name: Int) {
 
     fun addConnection(program: Program) {
         connections.add(program)
+    }
+
+    fun getTotalConnections(program: Program): Int {
+        val visited = mutableListOf<Program>()
+        val totalConnections = mutableSetOf<Program>()
+        program.connections.forEach({
+            if (!visited.contains(it)) {
+                totalConnections.add(program)
+                visited.add(it)
+                getTotalConnections(it)
+            }
+        })
+        return totalConnections.size
     }
 }
 
