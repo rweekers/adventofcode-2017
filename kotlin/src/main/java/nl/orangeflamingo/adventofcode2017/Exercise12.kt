@@ -7,11 +7,10 @@ class Exercise12(fileName: String) {
     private val steps = parseInput(fileName)
 
     fun silverExercise12(): Int {
-        // steps.forEach({println(it)})
-        return 0
+        return steps.size
     }
 
-    private fun parseInput(file: String): List<String> {
+    private fun parseInput(file: String): Set<Program> {
         val list = linesAsList(file)
         val regExp = """\w+""".toRegex()
         val programsByName = mutableMapOf<Int, Program>()
@@ -19,18 +18,16 @@ class Exercise12(fileName: String) {
             val parts = regExp.findAll(it).toList().map { it.value }
             val masterProgram = programsByName.getOrDefault(parts[0].toInt(), Program(parts[0].toInt()))
             programsByName.put(parts[0].toInt(), masterProgram)
-            println("For ${parts[0]} the linked stuff is: ")
             parts.drop(1).forEach( {
                 val program = programsByName.getOrDefault(it.toInt(), Program(it.toInt()))
                 program.addConnection(masterProgram)
                 masterProgram.addConnection(program)
                 programsByName.put(it.toInt(), program)
-                println(it)
             })
         })
         val p = programsByName.getOrElse(0, { Program(0) })
-        p.getTotalConnections(p)
-        return list
+        p.calculateTotalConnections(p)
+        return p.totalConnections
     }
 
     private fun linesAsList(file: String): MutableList<String> {
@@ -44,23 +41,37 @@ class Exercise12(fileName: String) {
 
 data class Program(val name: Int) {
 
+    companion object {
+        fun a() : Int = 1
+    }
+
     private val connections = mutableSetOf<Program>()
+    private val visited = mutableListOf<Program>()
+    val totalConnections = mutableSetOf<Program>()
+    var groups = 0
+    val inAnyGroup = mutableSetOf<Program>()
+
+    fun calculateTotalGroups(program: Program) {
+        program.connections.forEach( {
+            if(!inAnyGroup.contains(program)) {
+                groups++
+                // create groups
+            }
+        })
+    }
 
     fun addConnection(program: Program) {
         connections.add(program)
     }
 
-    fun getTotalConnections(program: Program): Int {
-        val visited = mutableListOf<Program>()
-        val totalConnections = mutableSetOf<Program>()
+    fun calculateTotalConnections(program: Program) {
         program.connections.forEach({
             if (!visited.contains(it)) {
-                totalConnections.add(program)
+                totalConnections.add(it)
                 visited.add(it)
-                getTotalConnections(it)
+                calculateTotalConnections(it)
             }
         })
-        return totalConnections.size
     }
 }
 

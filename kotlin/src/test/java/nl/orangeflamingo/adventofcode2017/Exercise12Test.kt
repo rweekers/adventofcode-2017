@@ -9,7 +9,7 @@ class Exercise12Test {
     @Test
     fun exercise12SilverTest() {
         val answer = Exercise12("/test/twelve/test12.txt").silverExercise12()
-        Assert.assertEquals(0, answer)
+        Assert.assertEquals(6, answer)
     }
 
 }
