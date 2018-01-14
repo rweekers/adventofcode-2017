@@ -5,13 +5,16 @@ import java.io.InputStream
 class Exercise12(fileName: String) {
 
     private val totalConnections = mutableSetOf<Program>()
-    private val steps = parseInput(fileName)
-
     private var groups = 0
     private val inAnyGroup = mutableSetOf<Program>()
+    private val steps = parseInput(fileName)
 
     fun silverExercise12(): Int {
         return steps.size
+    }
+
+    fun goldExercise12(): Int {
+        return groups
     }
 
     private fun parseInput(file: String): Set<Program> {
@@ -30,7 +33,8 @@ class Exercise12(fileName: String) {
             })
         })
         val p = programsByName.getOrElse(0, { Program(0) })
-        calculateTotalConnections(p, mutableSetOf<Program>())
+        calculateTotalConnections(p, mutableSetOf())
+        calculateTotalGroups(programsByName, mutableSetOf())
         return totalConnections
     }
 
@@ -52,11 +56,13 @@ class Exercise12(fileName: String) {
         })
     }
 
-    fun calculateTotalGroups(program: Program) {
-        program.connections.forEach({
-            if (!inAnyGroup.contains(program)) {
-                groups++
-                // create groups
+    private fun calculateTotalGroups(totalList: Map<Int, Program>, visited: MutableSet<Program>) {
+        totalList.values.forEach({
+            if (!visited.contains(it)) {
+                if(!inAnyGroup.contains(it)) {
+                    groups++
+                    inAnyGroup.add(it)
+                }
             }
         })
     }

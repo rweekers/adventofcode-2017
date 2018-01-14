@@ -6,10 +6,16 @@ import org.junit.Test
 
 class Exercise12Test {
 
+    private val exc12 = Exercise12("/test/twelve/test12.txt")
+
     @Test
     fun exercise12SilverTest() {
-        val answer = Exercise12("/test/twelve/test12.txt").silverExercise12()
-        Assert.assertEquals(6, answer)
+        Assert.assertEquals(6, exc12.silverExercise12())
+    }
+
+    @Test
+    fun exercise12GoldTest() {
+        Assert.assertEquals(6, exc12.goldExercise12())
     }
 
 }
