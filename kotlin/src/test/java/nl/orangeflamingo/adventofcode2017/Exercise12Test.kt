@@ -15,7 +15,7 @@ class Exercise12Test {
 
     @Test
     fun exercise12GoldTest() {
-        Assert.assertEquals(6, exc12.goldExercise12())
+        Assert.assertEquals(2, exc12.goldExercise12())
     }
 
 }

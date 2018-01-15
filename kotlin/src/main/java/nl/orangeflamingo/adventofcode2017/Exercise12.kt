@@ -4,23 +4,25 @@ import java.io.InputStream
 
 class Exercise12(fileName: String) {
 
-    private val totalConnections = mutableSetOf<Program>()
+    private val programsByName = mutableMapOf<Int, Program>()
     private var groups = 0
     private val inAnyGroup = mutableSetOf<Program>()
-    private val steps = parseInput(fileName)
+
+    init {
+        parseInput(fileName)
+    }
 
     fun silverExercise12(): Int {
-        return steps.size
+        return getConnectedTo(programsByName.getOrDefault(0, Program(0))).size
     }
 
     fun goldExercise12(): Int {
-        return groups
+        return calculateTotalGroups(programsByName)
     }
 
-    private fun parseInput(file: String): Set<Program> {
+    private fun parseInput(file: String) {
         val list = linesAsList(file)
         val regExp = """\w+""".toRegex()
-        val programsByName = mutableMapOf<Int, Program>()
         list.forEach({ it ->
             val parts = regExp.findAll(it).toList().map { it.value }
             val masterProgram = programsByName.getOrDefault(parts[0].toInt(), Program(parts[0].toInt()))
@@ -32,10 +34,6 @@ class Exercise12(fileName: String) {
                 programsByName.put(it.toInt(), program)
             })
         })
-        val p = programsByName.getOrElse(0, { Program(0) })
-        calculateTotalConnections(p, mutableSetOf())
-        calculateTotalGroups(programsByName, mutableSetOf())
-        return totalConnections
     }
 
     private fun linesAsList(file: String): MutableList<String> {
@@ -46,25 +44,26 @@ class Exercise12(fileName: String) {
         return lineList
     }
 
-    private fun calculateTotalConnections(program: Program, visited: MutableSet<Program>) {
+    private fun getConnectedTo(program: Program, visited: MutableSet<Program> = mutableSetOf()): Set<Program> {
         program.connections.forEach({
             if (!visited.contains(it)) {
-                totalConnections.add(it)
                 visited.add(it)
-                calculateTotalConnections(it, visited)
+                getConnectedTo(it, visited)
             }
         })
+        return visited
     }
 
-    private fun calculateTotalGroups(totalList: Map<Int, Program>, visited: MutableSet<Program>) {
+    private fun calculateTotalGroups(totalList: Map<Int, Program>, visited: MutableSet<Program> = mutableSetOf()): Int {
         totalList.values.forEach({
             if (!visited.contains(it)) {
                 if(!inAnyGroup.contains(it)) {
                     groups++
-                    inAnyGroup.add(it)
+                    inAnyGroup.addAll(getConnectedTo(it))
                 }
             }
         })
+        return groups
     }
 }
 
@@ -78,6 +77,9 @@ data class Program(val name: Int) {
 }
 
 fun main(args: Array<String>) {
-    val answerSilver = Exercise12("/input/input12.txt").silverExercise12()
+    val exc12 = Exercise12("/input/input12.txt")
+    val answerSilver = exc12.silverExercise12()
     println("The answer for the silver exercise is: $answerSilver")
+    val answerGold = exc12.goldExercise12()
+    println("The answer for the silver exercise is: $answerGold")
 }
