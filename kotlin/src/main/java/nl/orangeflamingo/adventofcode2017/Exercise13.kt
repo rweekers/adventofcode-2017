@@ -12,10 +12,19 @@ class Exercise13(fileName: String) {
     }
 
     fun silverExercise13(): Int {
-        getIterableStream()
-                .scan( { acc, curr -> curr } )
-                .subscribe( { println("Looping through $it") } )
+        var i = 0
+        var score = 0
+        while (i <= getMaxValue()) {
+            var currFirewall = getCurrFirewall(i)
+            if (currFirewall.index == 0) { score += currFirewall.range * i }
+            firewallMap.forEach { _, u -> u.doMove() }
+            i++
+        }
         return 0
+    }
+
+    private fun getCurrFirewall(index: Int): Firewall {
+        return firewallMap.getOrDefault(index, Firewall(0))
     }
 
     private fun parseInput(file: String) {
@@ -23,7 +32,7 @@ class Exercise13(fileName: String) {
         val regExp = """\w+""".toRegex()
         list.forEach({ it ->
             val parts = regExp.findAll(it).toList().map { it.value.toInt() }
-            firewallMap[parts[0]] = Firewall(parts[0])
+            firewallMap[parts[0]] = Firewall(parts[1])
         })
     }
 
@@ -46,9 +55,9 @@ class Exercise13(fileName: String) {
     }
 }
 
-data class Firewall(private val range: Int = 0, val index: Int = 0) {
-    fun doMove(): Firewall {
-        return Firewall(range, calculateIndex())
+data class Firewall(val range: Int, var index: Int = 0) {
+    fun doMove() {
+        index = calculateIndex()
     }
 
     private fun calculateIndex(): Int {
