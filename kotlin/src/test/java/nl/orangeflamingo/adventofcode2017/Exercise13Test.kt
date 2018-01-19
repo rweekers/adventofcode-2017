@@ -10,8 +10,12 @@ class Exercise13Test {
 
     @Test
     fun exercise13SilverTest() {
-        Assert.assertEquals(0, exc13.silverExercise13())
+        Assert.assertEquals(24, exc13.silverExercise13())
     }
 
+    @Test
+    fun exercise13GoldTest() {
+        Assert.assertEquals(10, exc13.goldExercise13())
+    }
 
 }
