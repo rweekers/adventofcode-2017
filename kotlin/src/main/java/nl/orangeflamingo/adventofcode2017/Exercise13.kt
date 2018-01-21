@@ -13,17 +13,13 @@ class Exercise13(fileName: String) {
 
     fun goldExercise13(): Int {
         var delay = 0
-        var score = calculateScore()
-        println("Score for delay $delay is $score")
-        while (score != 0) {
+        while (calculateScore(delay, true) != 0) {
             delay++
-            score = calculateScore(delay)
-            println("Score for delay $delay is $score")
         }
         return delay
     }
 
-    private fun calculateScore(delay: Int = 0): Int {
+    private fun calculateScore(delay: Int = 0, gold: Boolean = false): Int {
         parseInput(fileName)
         var iter = 0
         while (iter < delay) {
@@ -34,8 +30,12 @@ class Exercise13(fileName: String) {
         var score = 0
         while (i <= getMaxValue()) {
             var currFirewall = getCurrFirewall(i)
+            if (currFirewall.index == -1) {
+                score += 0
+            }
             if (currFirewall.index == 0) {
                 score += currFirewall.range * i
+                if (gold) return 1
             }
             doOneTick()
             i++
@@ -48,7 +48,7 @@ class Exercise13(fileName: String) {
     }
 
     private fun getCurrFirewall(index: Int): Firewall {
-        return firewallMap.getOrDefault(index, Firewall(0))
+        return firewallMap.getOrDefault(index, Firewall(0, -1))
     }
 
     private fun parseInput(file: String) {
