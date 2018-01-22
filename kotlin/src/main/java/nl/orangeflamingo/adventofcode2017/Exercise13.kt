@@ -5,50 +5,59 @@ import java.io.InputStream
 class Exercise13(fileName: String) {
 
     private val firewallMap = mutableMapOf<Int, Firewall>()
+    private val lastFirewallMap = mutableMapOf<Int, Firewall>()
     private val fileName = fileName
 
     fun silverExercise13(): Int {
-        return calculateScore()
-    }
-
-    fun goldExercise13(): Int {
-        var delay = 0
-        while (calculateScore(delay, true) != 0) {
-            delay++
-        }
-        return delay
-    }
-
-    private fun calculateScore(delay: Int = 0, gold: Boolean = false): Int {
         parseInput(fileName)
-        var iter = 0
-        while (iter < delay) {
-            doOneTick()
-            iter++
-        }
         var i = 0
         var score = 0
         while (i <= getMaxValue()) {
             var currFirewall = getCurrFirewall(i)
-            if (currFirewall.index == -1) {
-                score += 0
-            }
-            if (currFirewall.index == 0) {
-                score += currFirewall.range * i
-                if (gold) return 1
-            }
-            doOneTick()
+            if (currFirewall.index == 0) { score += currFirewall.range * i }
+            firewallMap.forEach { _, u -> u.doMove() }
             i++
         }
         return score
     }
 
-    private fun doOneTick() {
+    fun goldExercise13(): Int {
+        parseInput(fileName)
+        fillFirewallMap()
+        var delay = 0
+        while (isCaught()) {
+            delay++
+            doOneTick()
+            fillFirewallMap()
+        }
+        return delay
+    }
+
+    private fun fillFirewallMap() {
+        lastFirewallMap.clear()
+        firewallMap.forEach( { key, value -> lastFirewallMap.put(key, Firewall(value.range, value.index))} )
+    }
+
+    private fun isCaught(): Boolean {
+        var i = 0
+        while (i <= getMaxValue()) {
+            val currFirewall = lastFirewallMap.getOrDefault(i, Firewall(0, -1))
+            if (currFirewall.index == 0) {
+                return true
+            }
+            lastFirewallMap.forEach { _, u -> u.doMove() }
+            i++
+        }
+        return false
+    }
+
+    private fun doOneTick(): Map<Int, Firewall> {
         firewallMap.forEach { _, u -> u.doMove() }
+        return firewallMap
     }
 
     private fun getCurrFirewall(index: Int): Firewall {
-        return firewallMap.getOrDefault(index, Firewall(0, -1))
+        return firewallMap.getOrDefault(index, Firewall(0, 0))
     }
 
     private fun parseInput(file: String) {
@@ -106,6 +115,6 @@ fun main(args: Array<String>) {
     val exc13 = Exercise13("/input/input13.txt")
     val answerSilver = exc13.silverExercise13()
     println("The answer for the silver exercise is: $answerSilver")
-    val answerGold = exc13.goldExercise13()
-    println("The answer for the gold exercise is: $answerGold")
+     val answerGold = exc13.goldExercise13()
+     println("The answer for the gold exercise is: $answerGold")
 }
