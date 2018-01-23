@@ -13,7 +13,16 @@ class Exercise14(fileName: String) {
 
     private fun parseInput(file: String): String {
         val inputStream: InputStream = this.javaClass.getResource(file).openStream()
-        return inputStream.bufferedReader().readLine()
+        val inputString = inputStream.bufferedReader().readLine()
+        val inputList = (0..127)
+                .map { knotHash("$inputString-$it") }
+                .map { it.toInt(16).toString(2).padStart(128, '0') }
+        return inputString
+    }
+
+    private fun knotHash(input: String): String {
+        // TODO implement/call KnotHash (see exercise 10)
+        return "12345678"
     }
 }
 
