@@ -35,7 +35,7 @@ class Exercise13(fileName: String) {
 
     private fun fillFirewallMap() {
         lastFirewallMap.clear()
-        firewallMap.forEach( { key, value -> lastFirewallMap.put(key, Firewall(value.range, value.index))} )
+        firewallMap.forEach( { key, value -> lastFirewallMap.put(key, Firewall(value.range, value.index, value.inc))} )
     }
 
     private fun isCaught(): Boolean {
@@ -51,9 +51,8 @@ class Exercise13(fileName: String) {
         return false
     }
 
-    private fun doOneTick(): Map<Int, Firewall> {
+    private fun doOneTick() {
         firewallMap.forEach { _, u -> u.doMove() }
-        return firewallMap
     }
 
     private fun getCurrFirewall(index: Int): Firewall {
@@ -85,8 +84,7 @@ class Exercise13(fileName: String) {
     }
 }
 
-data class Firewall(val range: Int, var index: Int = 0) {
-    var inc = true
+data class Firewall(val range: Int, var index: Int = 0, var inc: Boolean = true) {
 
     fun doMove() {
         index = calculateIndex()
