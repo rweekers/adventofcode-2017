@@ -66,7 +66,7 @@ data class Node(val name: String, private val value: Int
                 val childrenByValue = children.groupBy { it.getTotalValue() }
                 val wrongValueNode = childrenByValue.minBy { it.value.size }?.value?.first()
                         ?: throw RuntimeException("No balanced children should be there")
-                wrongValueNode.findDifferenceInValue(wrongValue ?: childrenByValue.keys.reduce { a, b -> a - b }.absoluteValue)
+                wrongValueNode.findDifferenceInValue(wrongValue ?: Math.abs(childrenByValue.keys.reduce { a, b -> a - b }))
             }
 
     private fun childrenHaveEqualValue(): Boolean {

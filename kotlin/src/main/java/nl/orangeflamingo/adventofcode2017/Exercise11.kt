@@ -55,9 +55,9 @@ data class Hexagon(val x: Int, val y: Int, val z: Int) {
 
     fun calculateDistance(): Int {
         return maxOf(
-                this.x.absoluteValue,
-                this.y.absoluteValue,
-                this.z.absoluteValue
+                Math.abs(this.x),
+                Math.abs(this.y),
+                Math.abs(this.z)
         )
     }
 }
