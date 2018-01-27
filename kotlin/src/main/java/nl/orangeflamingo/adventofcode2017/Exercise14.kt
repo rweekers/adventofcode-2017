@@ -1,28 +1,82 @@
 package nl.orangeflamingo.adventofcode2017
 
+import io.reactivex.rxkotlin.toObservable
 import java.io.InputStream
+import java.math.BigInteger
 
 class Exercise14(fileName: String) {
 
-    private val inputString = parseInput(fileName)
+    private val inputList = parseInput(fileName)
 
     fun silverExercise14(): Int {
-        println("Input string is $inputString")
-        return 0
+        return inputList.sumBy { it.count { it == '1' } }
     }
 
-    private fun parseInput(file: String): String {
+    private fun parseInput(file: String): List<String> {
         val inputStream: InputStream = this.javaClass.getResource(file).openStream()
         val inputString = inputStream.bufferedReader().readLine()
-        val inputList = (0..127)
-                .map { knotHash("$inputString-$it") }
-                .map { it.toInt(16).toString(2).padStart(128, '0') }
-        return inputString
+        return (0..127)
+                .map { KnotHash.knotHash("$inputString-$it") }
+                .map { BigInteger(it, 16).toString(2).padStart(128, '0') }
     }
+}
 
-    private fun knotHash(input: String): String {
-        // TODO implement/call KnotHash (see exercise 10)
-        return "12345678"
+class KnotHash {
+
+    companion object {
+
+        private val magicLengths = listOf(17, 31, 73, 47, 23)
+
+        fun knotHash(inputString: String): String {
+            var denseHash = String()
+            runForLengths((inputString.map { it.toInt() } + magicLengths).toIntArray())
+                    .toObservable()
+                    .buffer(16)
+                    .map({ a -> hash(a) })
+                    .reduce({ acc, cur -> acc + cur })
+                    .subscribe({ x -> denseHash = x })
+            return denseHash
+        }
+
+        private fun hash(list: List<Int>): String {
+            var hash = String()
+            list.toObservable()
+                    .reduce({ acc, curr -> acc.xor(curr) })
+                    .map { x -> Integer.toHexString(x) }
+                    .subscribe({ x -> hash = x })
+            return hash
+        }
+
+        private fun runForLengths(lengths: IntArray): IntArray {
+            val ring = IntArray(256) { it }
+            var position = 0
+            var skip = 0
+            repeat(64) {
+                lengths.forEach { length ->
+                    reverseSection(ring, position, length)
+                    position = (position + length + skip) % ring.size
+                    skip += 1
+                }
+            }
+            return ring
+        }
+
+        private fun reverseSection(ring: IntArray, from: Int, length: Int) {
+            var fromIdx = from % ring.size
+            var toIdx = (fromIdx + length - 1) % ring.size
+            repeat(length / 2) {
+                ring.swapElements(fromIdx, toIdx)
+                fromIdx = fromIdx.inc() % ring.size
+                toIdx = toIdx.dec().takeIf { it >= 0 } ?: ring.size - 1
+            }
+        }
+
+        private fun IntArray.swapElements(a: Int, b: Int): IntArray {
+            val tmp = this[a]
+            this[a] = this[b]
+            this[b] = tmp
+            return this
+        }
     }
 }
 

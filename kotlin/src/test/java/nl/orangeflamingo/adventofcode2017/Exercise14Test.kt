@@ -9,6 +9,6 @@ class Exercise14Test {
 
     @Test
     fun exercise14SilverTest() {
-        Assert.assertEquals(0, exc14.silverExercise14())
+        Assert.assertEquals(8108, exc14.silverExercise14())
     }
 }
