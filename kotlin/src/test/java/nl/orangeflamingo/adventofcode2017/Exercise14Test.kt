@@ -1,7 +1,7 @@
 package nl.orangeflamingo.adventofcode2017
 
-import org.junit.Assert
 import org.junit.Test
+import kotlin.test.assertEquals
 
 class Exercise14Test {
 
@@ -9,6 +9,11 @@ class Exercise14Test {
 
     @Test
     fun exercise14SilverTest() {
-        Assert.assertEquals(8108, exc14.silverExercise14())
+        assertEquals(8108, exc14.silverExercise14())
+    }
+
+    @Test
+    fun exercise14GoldTest() {
+        assertEquals(1242, exc14.goldExercise14())
     }
 }

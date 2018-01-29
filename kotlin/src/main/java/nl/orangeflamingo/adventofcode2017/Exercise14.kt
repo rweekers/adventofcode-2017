@@ -7,9 +7,63 @@ import java.math.BigInteger
 class Exercise14(fileName: String) {
 
     private val inputList = parseInput(fileName)
+    private val grid = convertToArray()
 
     fun silverExercise14(): Int {
         return inputList.sumBy { it.count { it == '1' } }
+    }
+
+    fun goldExercise14(): Int {
+        return solvePart2()
+    }
+
+    fun solvePart2(): Int {
+        var groups = 0
+        printGrid()
+        grid.forEachIndexed { x, row ->
+            row.forEachIndexed { y, spot ->
+                if (spot == 1) {
+                    groups += 1
+                    markNeighbors(x, y)
+                }
+            }
+        }
+        println()
+        println("==========")
+        println()
+        printGrid()
+        return groups
+    }
+
+    private fun markNeighbors(x: Int, y: Int) {
+        if (grid[x][y] == 1) {
+            grid[x][y] = 2
+            neighborsOf(x, y).forEach {
+                markNeighbors(it.first, it.second)
+            }
+        }
+    }
+
+    private fun printGrid() {
+        grid.forEachIndexed( { x, row ->
+            row.forEachIndexed( { y, spot -> print("$spot ") } )
+            println()
+        })
+    }
+
+    private fun neighborsOf(x: Int, y: Int): List<Pair<Int, Int>> =
+            listOf(Pair(x - 1, y), Pair(x + 1, y), Pair(x, y - 1), Pair(x, y + 1))
+                    .filter { it.first in 0..127 }
+                    .filter { it.second in 0..127 }
+
+    private fun convertToArray(): List<IntArray> {
+        return inputList
+                .map { s -> s.map { translate(it) } }
+                .map { it.toIntArray() }
+    }
+
+    private fun translate(c: Char): Int {
+        return if (c == '1') 1 else 0
     }
 
     private fun parseInput(file: String): List<String> {
@@ -84,4 +138,6 @@ fun main(args: Array<String>) {
     val exc14 = Exercise14("/input/input14.txt")
     val answerSilver = exc14.silverExercise14()
     println("The answer for the silver exercise is: $answerSilver")
+    val answerGold = exc14.goldExercise14()
+    println("The answer for the gold exercise is: $answerGold")
 }
