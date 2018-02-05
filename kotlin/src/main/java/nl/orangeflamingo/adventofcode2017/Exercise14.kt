@@ -1,6 +1,5 @@
 package nl.orangeflamingo.adventofcode2017
 
-import io.reactivex.rxkotlin.toObservable
 import java.io.InputStream
 import java.math.BigInteger
 
@@ -14,12 +13,7 @@ class Exercise14(fileName: String) {
     }
 
     fun goldExercise14(): Int {
-        return solvePart2()
-    }
-
-    fun solvePart2(): Int {
         var groups = 0
-        printGrid()
         grid.forEachIndexed { x, row ->
             row.forEachIndexed { y, spot ->
                 if (spot == 1) {
@@ -28,10 +22,6 @@ class Exercise14(fileName: String) {
                 }
             }
         }
-        println()
-        println("==========")
-        println()
-        printGrid()
         return groups
     }
 
@@ -42,13 +32,6 @@ class Exercise14(fileName: String) {
                 markNeighbors(it.first, it.second)
             }
         }
-    }
-
-    private fun printGrid() {
-        grid.forEachIndexed( { x, row ->
-            row.forEachIndexed( { y, spot -> print("$spot ") } )
-            println()
-        })
     }
 
     private fun neighborsOf(x: Int, y: Int): List<Pair<Int, Int>> =
@@ -79,26 +62,20 @@ class KnotHash {
 
     companion object {
 
-        private val magicLengths = listOf(17, 31, 73, 47, 23)
+        private val prefix = listOf(17, 31, 73, 47, 23)
 
         fun knotHash(inputString: String): String {
-            var denseHash = String()
-            runForLengths((inputString.map { it.toInt() } + magicLengths).toIntArray())
-                    .toObservable()
-                    .buffer(16)
-                    .map({ a -> hash(a) })
-                    .reduce({ acc, cur -> acc + cur })
-                    .subscribe({ x -> denseHash = x })
-            return denseHash
+            return runForLengths((inputString.map { it.toInt() } + prefix).toIntArray()).toList()
+                    .chunked(16)
+                    .joinToString("") { toHexadecimal(xor(it), 2) }
         }
 
-        private fun hash(list: List<Int>): String {
-            var hash = String()
-            list.toObservable()
-                    .reduce({ acc, curr -> acc.xor(curr) })
-                    .map { x -> Integer.toHexString(x) }
-                    .subscribe({ x -> hash = x })
-            return hash
+        private fun xor(value: List<Int>): Int {
+            return value.reduce( { a, b -> a xor b } )
+        }
+
+        private fun toHexadecimal(value: Int, width: Int = 1): String {
+            return "%0${width}x".format(value)
         }
 
         private fun runForLengths(lengths: IntArray): IntArray {
