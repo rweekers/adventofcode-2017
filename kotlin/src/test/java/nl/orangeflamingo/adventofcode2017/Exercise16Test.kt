@@ -5,7 +5,7 @@ import kotlin.test.assertEquals
 
 class Exercise16Test {
 
-    private val exc16 = Exercise16("/test/sixteen/test16.txt")
+    private val exc16 = Exercise16("/test/sixteen/test16.txt", "abcde".toCharArray())
 
     @Test
     fun exercise16SilverTest() {
