@@ -2,36 +2,42 @@ package nl.orangeflamingo.adventofcode2017
 
 import java.io.InputStream
 
-class Exercise16(fileName: String, var programs: CharArray) {
+class Exercise16(fileName: String, private var programs: String) {
 
     private val moves: List<Move> = parseInput(fileName)
 
     fun silverExercise16(): String {
-        moves.forEach({ move -> processMove(move)})
-        return programs.joinToString("")
+        return processMoves()
     }
 
-    fun goldExercise16(): String {
-        return "TODO"
-    }
-
-    private fun processMove(move: Move) {
-        when (move) {
-            is Spin -> programs = (programs.takeLast(move.size) + programs.dropLast(move.size)).toCharArray()
-            is Swap -> {
-                val tmp = programs[move.left]
-                programs[move.left] = programs[move.right]
-                programs[move.right] = tmp
-            }
-            is Swap2 -> {
-                val indexLeft = programs.indexOf(move.left)
-                val indexRight = programs.indexOf(move.right)
-                val tmp = programs[indexLeft]
-                programs[indexLeft] = programs[indexRight]
-                programs[indexRight] = tmp
-            }
+    tailrec fun goldExercise16(danceFloorStore: Map<String, Int> = mapOf(), iterations: Int = 0, danceFloor: String = programs): String {
+        return if (danceFloor in danceFloorStore) {
+            val startCycle = danceFloorStore.getValue(danceFloor)
+            val offset = (1000000000 % (iterations - startCycle)) - startCycle
+            danceFloorStore.entries.first { it.value == offset }.key
+        } else {
+            goldExercise16(danceFloorStore + (danceFloor to iterations), iterations.inc(), processMoves(danceFloor.toCharArray()))
         }
     }
+
+    private fun processMoves(progs: CharArray = programs.toCharArray()): String {
+        return moves.fold(progs) { acc, curr -> processMove(acc, curr) }.joinToString("")
+    }
+
+    private fun processMove(prog: CharArray, move: Move): CharArray =
+        when (move) {
+            is Spin -> (prog.takeLast(move.size) + prog.dropLast(move.size)).toCharArray()
+            is Swap -> swap(move.left, move.right, prog)
+            is SwapByName -> swap(prog.indexOf(move.left), prog.indexOf(move.right), prog)
+        }
+
+    private fun swap(left: Int, right: Int, prog: CharArray): CharArray {
+        val tmp = prog[left]
+        prog[left] = prog[right]
+        prog[right] = tmp
+        return prog
+    }
+
 
     private fun parseInput(file: String): List<Move> {
         val inputStream: InputStream = this.javaClass.getResource(file).openStream()
@@ -45,7 +51,7 @@ class Exercise16(fileName: String, var programs: CharArray) {
                         Swap(t[0], t[1])
                     } else {
                         val t2 = it.drop(1).split("/")
-                        Swap2(t2[0].single(), t2[1].single())
+                        SwapByName(t2[0].single(), t2[1].single())
                     }
                 }
     }
@@ -54,24 +60,17 @@ class Exercise16(fileName: String, var programs: CharArray) {
 
 sealed class Move
 
-class Spin(val size: Int) : Move() {
+class Spin(val size: Int) : Move()
 
+class Swap(val left: Int, val right: Int) : Move()
 
-}
-
-class Swap(val left: Int, val right: Int) : Move() {
-
-}
-
-class Swap2(val left: Char, val right: Char) : Move() {
-
-}
+class SwapByName(val left: Char, val right: Char) : Move()
 
 fun main(args: Array<String>) {
-    val programs = "abcdefghijklmnop".toCharArray()
+    val programs = "abcdefghijklmnop"
     val exc16 = Exercise16("/input/input16.txt", programs)
     val answerSilver = exc16.silverExercise16()
     println("The answer for the silver exercise is: $answerSilver")
     val answerGold = exc16.goldExercise16()
-    println("The answer for the silver exercise is: $answerGold")
+    println("The answer for the gold exercise is: $answerGold")
 }
