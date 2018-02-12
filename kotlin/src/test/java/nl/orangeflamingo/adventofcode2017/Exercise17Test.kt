@@ -19,4 +19,10 @@ class Exercise17Test {
         val exc17 = Exercise17(actualPuzzleInput)
         assertEquals(355, exc17.silverExercise17())
     }
+
+    @Test
+    fun `actual input gold`() {
+        val exc17 = Exercise17(actualPuzzleInput)
+        assertEquals(6154117, exc17.goldExercise17())
+    }
 }
