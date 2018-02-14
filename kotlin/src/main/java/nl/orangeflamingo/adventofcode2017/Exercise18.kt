@@ -5,10 +5,6 @@ import java.io.InputStream
 class Exercise18(fileName: String) {
 
     private val instructions: List<Instruction> = parseInput(fileName)
-    private val register: MutableMap<Char, Long> = mutableMapOf()
-    private var recoveredFrequency: Long = 0
-    private var foundFrequency: Long = 0
-    private var index = 0
 
     private fun linesAsList(file: String): MutableList<String> {
         val inputStream: InputStream = this.javaClass.getResource(file).openStream()
@@ -19,11 +15,38 @@ class Exercise18(fileName: String) {
     }
 
     fun silverExercise18(): Long {
-        processInstructions()
-        return foundFrequency
+        val duet = Duet(instructions)
+        duet.processInstructions()
+        return duet.foundFrequency
     }
 
-    private fun processInstructions() {
+    private fun parseInput(file: String): List<Instruction> {
+        val list = linesAsList(file)
+        val regExp2 = """\S+""".toRegex()
+
+        return list.map {
+            val parts = regExp2.findAll(it).toList().map { it.value }
+
+            when (parts[0]) {
+                "set" -> if (parts[2].toLongOrNull() != null) SetValue(parts[1].toFirstChar(), parts[2].toLong()) else SetRegister(parts[1].toFirstChar(), parts[2].toFirstChar())
+                "snd" -> Sound(parts[1].toFirstChar())
+                "add" -> if (parts[2].toLongOrNull() != null) AddValue(parts[1].toFirstChar(), parts[2].toLong()) else AddRegister(parts[1].toFirstChar(), parts[2].toFirstChar())
+                "mul" -> if (parts[2].toLongOrNull() != null) MultiplyValue(parts[1].toFirstChar(), parts[2].toLong()) else MultiplyRegister(parts[1].toFirstChar(), parts[2].toFirstChar())
+                "mod" -> if (parts[2].toLongOrNull() != null) ModuloValue(parts[1].toFirstChar(), parts[2].toLong()) else ModuloRegister(parts[1].toFirstChar(), parts[2].toFirstChar())
+                "rcv" -> Recover(parts[1].toFirstChar())
+                "jgz" -> if (parts[2].toLongOrNull() != null) JumpValue(parts[1].toFirstChar(), parts[2].toLong()) else JumpRegister(parts[1].toFirstChar(), parts[2].toFirstChar())
+                else -> Sound(parts[1].toFirstChar())
+            }
+        }
+    }
+
+    private fun String.toFirstChar(): Char {
+        return this.toCharArray()[0]
+    }
+}
+
+data class Duet(private val instructions: List<Instruction>, private val register: MutableMap<Char, Long> = mutableMapOf(), private var index: Int = 0, private var recoveredFrequency: Long = 0, var foundFrequency: Long = 0) {
+    fun processInstructions() {
         while (recoveredFrequency == 0L) {
             processInstruction(instructions[index])
         }
@@ -82,31 +105,6 @@ class Exercise18(fileName: String) {
             is JumpValue -> if (getRegisterValue(instruction.register) > 0) index += instruction.offset.toInt() else index++
             is JumpRegister -> if (getRegisterValue(instruction.register) > 0) index += getRegisterValue(instruction.offset).toInt() else index++
         }
-    }
-
-
-    private fun parseInput(file: String): List<Instruction> {
-        val list = linesAsList(file)
-        val regExp2 = """\S+""".toRegex()
-
-        return list.map {
-            val parts = regExp2.findAll(it).toList().map { it.value }
-
-            when (parts[0]) {
-                "set" -> if (parts[2].toLongOrNull() != null) SetValue(parts[1].toFirstChar(), parts[2].toLong()) else SetRegister(parts[1].toFirstChar(), parts[2].toFirstChar())
-                "snd" -> Sound(parts[1].toFirstChar())
-                "add" -> if (parts[2].toLongOrNull() != null) AddValue(parts[1].toFirstChar(), parts[2].toLong()) else AddRegister(parts[1].toFirstChar(), parts[2].toFirstChar())
-                "mul" -> if (parts[2].toLongOrNull() != null) MultiplyValue(parts[1].toFirstChar(), parts[2].toLong()) else MultiplyRegister(parts[1].toFirstChar(), parts[2].toFirstChar())
-                "mod" -> if (parts[2].toLongOrNull() != null) ModuloValue(parts[1].toFirstChar(), parts[2].toLong()) else ModuloRegister(parts[1].toFirstChar(), parts[2].toFirstChar())
-                "rcv" -> Recover(parts[1].toFirstChar())
-                "jgz" -> if (parts[2].toLongOrNull() != null) JumpValue(parts[1].toFirstChar(), parts[2].toLong()) else JumpRegister(parts[1].toFirstChar(), parts[2].toFirstChar())
-                else -> Sound(parts[1].toFirstChar())
-            }
-        }
-    }
-
-    private fun String.toFirstChar(): Char {
-        return this.toCharArray()[0]
     }
 }
 
