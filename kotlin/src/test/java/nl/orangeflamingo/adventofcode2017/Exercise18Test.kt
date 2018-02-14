@@ -16,4 +16,10 @@ class Exercise18Test {
         val exc18 = Exercise18("/input/input18.txt")
         assertEquals(7071, exc18.silverExercise18())
     }
+
+    @Test
+    fun `actual input gold`() {
+        val exc18 = Exercise18("/input/input18.txt")
+        assertEquals(0, exc18.goldExercise18())
+    }
 }

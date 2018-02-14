@@ -1,6 +1,8 @@
 package nl.orangeflamingo.adventofcode2017
 
 import java.io.InputStream
+import java.util.concurrent.BlockingQueue
+import java.util.concurrent.LinkedBlockingDeque
 
 class Exercise18(fileName: String) {
 
@@ -18,6 +20,14 @@ class Exercise18(fileName: String) {
         val duet = Duet(instructions)
         duet.processInstructions()
         return duet.foundFrequency
+    }
+
+    fun goldExercise18(): Long {
+        val program0Ingoing = LinkedBlockingDeque<Long>()
+        val program1Ingoing = LinkedBlockingDeque<Long>()
+        val realDuet = RealDuet(instructions, program1Ingoing, program0Ingoing)
+        realDuet.processInstructions()
+        return realDuet.foundFrequency
     }
 
     private fun parseInput(file: String): List<Instruction> {
@@ -46,6 +56,75 @@ class Exercise18(fileName: String) {
 }
 
 data class Duet(private val instructions: List<Instruction>, private val register: MutableMap<Char, Long> = mutableMapOf(), private var index: Int = 0, private var recoveredFrequency: Long = 0, var foundFrequency: Long = 0) {
+    fun processInstructions() {
+        while (recoveredFrequency == 0L) {
+            processInstruction(instructions[index])
+        }
+    }
+
+    private fun setRegisterValue(registerKey: Char, value: Long) {
+        register[registerKey] = value
+    }
+
+    private fun getRegisterValue(registerKey: Char): Long {
+        return register.computeIfAbsent(registerKey, { _ -> 0 })
+    }
+
+    private fun processInstruction(instruction: Instruction) {
+        when (instruction) {
+            is SetValue -> {
+                setRegisterValue(instruction.register, instruction.value)
+                index++
+            }
+            is SetRegister -> {
+                setRegisterValue(instruction.register, getRegisterValue(instruction.value))
+                index++
+            }
+            is Sound -> {
+                foundFrequency = getRegisterValue(instruction.register)
+                index++
+            }
+            is AddValue -> {
+                setRegisterValue(instruction.register, getRegisterValue(instruction.register) + instruction.value)
+                index++
+            }
+            is AddRegister -> {
+                setRegisterValue(instruction.register, getRegisterValue(instruction.register) + getRegisterValue(instruction.value))
+                index++
+            }
+            is MultiplyValue -> {
+                setRegisterValue(instruction.register, getRegisterValue(instruction.register) * instruction.multiplier)
+                index++
+            }
+            is MultiplyRegister -> {
+                setRegisterValue(instruction.register, getRegisterValue(instruction.register) * getRegisterValue(instruction.multiplier))
+                index++
+            }
+            is ModuloValue -> {
+                setRegisterValue(instruction.register, getRegisterValue(instruction.register) % instruction.divider)
+                index++
+            }
+            is ModuloRegister -> {
+                setRegisterValue(instruction.register, getRegisterValue(instruction.register) % getRegisterValue(instruction.divider))
+                index++
+            }
+            is Recover -> {
+                if (getRegisterValue(instruction.register) > 0) recoveredFrequency = getRegisterValue(instruction.register)
+                index++
+            }
+            is JumpValue -> if (getRegisterValue(instruction.register) > 0) index += instruction.offset.toInt() else index++
+            is JumpRegister -> if (getRegisterValue(instruction.register) > 0) index += getRegisterValue(instruction.offset).toInt() else index++
+        }
+    }
+}
+
+data class RealDuet(private val instructions: List<Instruction>,
+                    private val outgoing: BlockingQueue<Long>,
+                    private val incoming: BlockingQueue<Long>,
+                    private val register: MutableMap<Char, Long> = mutableMapOf(),
+                    private var index: Int = 0,
+                    private var recoveredFrequency: Long = 0,
+                    var foundFrequency: Long = 0) {
     fun processInstructions() {
         while (recoveredFrequency == 0L) {
             processInstruction(instructions[index])
