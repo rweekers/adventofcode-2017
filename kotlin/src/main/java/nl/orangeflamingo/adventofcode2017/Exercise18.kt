@@ -2,7 +2,9 @@ package nl.orangeflamingo.adventofcode2017
 
 import java.io.InputStream
 import java.util.concurrent.BlockingQueue
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.LinkedBlockingDeque
+import java.util.concurrent.TimeUnit
 
 class Exercise18(fileName: String) {
 
@@ -25,9 +27,14 @@ class Exercise18(fileName: String) {
     fun goldExercise18(): Long {
         val program0Ingoing = LinkedBlockingDeque<Long>()
         val program1Ingoing = LinkedBlockingDeque<Long>()
-        val realDuet = RealDuet(instructions, program1Ingoing, program0Ingoing)
-        realDuet.processInstructions()
-        return realDuet.foundFrequency
+
+        val realDuet1 = RealDuet(instructions, program1Ingoing, program0Ingoing)
+        realDuet1.processInstructions()
+
+        val realDuet2 = RealDuet(instructions, program1Ingoing, program0Ingoing)
+        realDuet2.processInstructions()
+
+        return realDuet1.timesSent
     }
 
     private fun parseInput(file: String): List<Instruction> {
@@ -123,12 +130,16 @@ data class RealDuet(private val instructions: List<Instruction>,
                     private val incoming: BlockingQueue<Long>,
                     private val register: MutableMap<Char, Long> = mutableMapOf(),
                     private var index: Int = 0,
-                    private var recoveredFrequency: Long = 0,
-                    var foundFrequency: Long = 0) {
-    fun processInstructions() {
-        while (recoveredFrequency == 0L) {
-            processInstruction(instructions[index])
+                    var timesSent: Long = 0) {
+    fun processInstructions(): Long {
+        CompletableFuture.supplyAsync {
+            do {
+                instructions.getOrNull(index)?.let {
+                    processInstruction(it)
+                }
+            } while (index < instructions.size)
         }
+        return timesSent
     }
 
     private fun setRegisterValue(registerKey: Char, value: Long) {
@@ -150,8 +161,9 @@ data class RealDuet(private val instructions: List<Instruction>,
                 index++
             }
             is Sound -> {
-                foundFrequency = getRegisterValue(instruction.register)
                 index++
+                outgoing.put(getRegisterValue(instruction.register))
+                timesSent += 1
             }
             is AddValue -> {
                 setRegisterValue(instruction.register, getRegisterValue(instruction.register) + instruction.value)
@@ -178,8 +190,11 @@ data class RealDuet(private val instructions: List<Instruction>,
                 index++
             }
             is Recover -> {
-                if (getRegisterValue(instruction.register) > 0) recoveredFrequency = getRegisterValue(instruction.register)
-                index++
+                try {
+                    register[instruction.register] = incoming.poll(1, TimeUnit.SECONDS)
+                } catch (e: Exception) {
+                    index = -2
+                }
             }
             is JumpValue -> if (getRegisterValue(instruction.register) > 0) index += instruction.offset.toInt() else index++
             is JumpRegister -> if (getRegisterValue(instruction.register) > 0) index += getRegisterValue(instruction.offset).toInt() else index++
