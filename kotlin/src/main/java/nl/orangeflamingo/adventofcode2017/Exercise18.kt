@@ -28,13 +28,9 @@ class Exercise18(fileName: String) {
         val program0Ingoing = LinkedBlockingDeque<Long>()
         val program1Ingoing = LinkedBlockingDeque<Long>()
 
-        val realDuet1 = RealDuet(instructions, program1Ingoing, program0Ingoing)
-        realDuet1.processInstructions()
+        RealDuet(instructions, program1Ingoing, program0Ingoing).processInstructions()
 
-        val realDuet2 = RealDuet(instructions, program1Ingoing, program0Ingoing)
-        realDuet2.processInstructions()
-
-        return realDuet1.timesSent
+        return RealDuet(instructions, program1Ingoing, program0Ingoing).processInstructions().get()
     }
 
     private fun parseInput(file: String): List<Instruction> {
@@ -130,17 +126,17 @@ data class RealDuet(private val instructions: List<Instruction>,
                     private val incoming: BlockingQueue<Long>,
                     private val register: MutableMap<Char, Long> = mutableMapOf(),
                     private var index: Int = 0,
-                    var timesSent: Long = 0) {
-    fun processInstructions(): Long {
+                    private var timesSent: Long = 0) {
+
+    fun processInstructions(): CompletableFuture<Long> =
         CompletableFuture.supplyAsync {
             do {
                 instructions.getOrNull(index)?.let {
                     processInstruction(it)
                 }
-            } while (index < instructions.size)
+            } while (index in 0 until instructions.size)
+            timesSent
         }
-        return timesSent
-    }
 
     private fun setRegisterValue(registerKey: Char, value: Long) {
         register[registerKey] = value
@@ -229,7 +225,10 @@ class JumpValue(val register: Char, val offset: Long) : Instruction()
 class JumpRegister(val register: Char, val offset: Char) : Instruction()
 
 fun main(args: Array<String>) {
-    val exc18 = Exercise18("/input/input18.txt")
-    val answerSilver = exc18.silverExercise18()
-    println("The answer for the silver exercise is: $answerSilver")
+//    val exc18Silver = Exercise18("/input/input18.txt")
+//    val answerSilver = exc18Silver.silverExercise18()
+//    println("The answer for the silver exercise is: $answerSilver")
+    val exc18Gold = Exercise18("/input/input18.txt")
+    val answerGold = exc18Gold.goldExercise18()
+    println("The answer for the gold exercise is: $answerGold")
 }
