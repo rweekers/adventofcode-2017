@@ -30,7 +30,7 @@ class Exercise18(fileName: String) {
 
         RealDuet(instructions, program1Ingoing, program0Ingoing).processInstructions()
 
-        return RealDuet(instructions, program1Ingoing, program0Ingoing).processInstructions().get()
+        return RealDuet(instructions, program0Ingoing, program1Ingoing).processInstructions().get()
     }
 
     private fun parseInput(file: String): List<Instruction> {
@@ -122,8 +122,8 @@ data class Duet(private val instructions: List<Instruction>, private val registe
 }
 
 data class RealDuet(private val instructions: List<Instruction>,
-                    private val outgoing: BlockingQueue<Long>,
                     private val incoming: BlockingQueue<Long>,
+                    private val outgoing: BlockingQueue<Long>,
                     private val register: MutableMap<Char, Long> = mutableMapOf(),
                     private var index: Int = 0,
                     private var timesSent: Long = 0) {
@@ -225,9 +225,9 @@ class JumpValue(val register: Char, val offset: Long) : Instruction()
 class JumpRegister(val register: Char, val offset: Char) : Instruction()
 
 fun main(args: Array<String>) {
-//    val exc18Silver = Exercise18("/input/input18.txt")
-//    val answerSilver = exc18Silver.silverExercise18()
-//    println("The answer for the silver exercise is: $answerSilver")
+    val exc18Silver = Exercise18("/input/input18.txt")
+    val answerSilver = exc18Silver.silverExercise18()
+    println("The answer for the silver exercise is: $answerSilver")
     val exc18Gold = Exercise18("/input/input18.txt")
     val answerGold = exc18Gold.goldExercise18()
     println("The answer for the gold exercise is: $answerGold")
