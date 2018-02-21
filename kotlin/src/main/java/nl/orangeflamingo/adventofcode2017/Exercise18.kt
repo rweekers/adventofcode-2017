@@ -75,49 +75,20 @@ data class Duet(private val instructions: List<Instruction>, private val registe
 
     private fun processInstruction(instruction: Instruction) {
         when (instruction) {
-            is SetValue -> {
-                setRegisterValue(instruction.register, instruction.value)
-                index++
-            }
-            is SetRegister -> {
-                setRegisterValue(instruction.register, getRegisterValue(instruction.value))
-                index++
-            }
-            is Sound -> {
-                foundFrequency = getRegisterValue(instruction.register)
-                index++
-            }
-            is AddValue -> {
-                setRegisterValue(instruction.register, getRegisterValue(instruction.register) + instruction.value)
-                index++
-            }
-            is AddRegister -> {
-                setRegisterValue(instruction.register, getRegisterValue(instruction.register) + getRegisterValue(instruction.value))
-                index++
-            }
-            is MultiplyValue -> {
-                setRegisterValue(instruction.register, getRegisterValue(instruction.register) * instruction.multiplier)
-                index++
-            }
-            is MultiplyRegister -> {
-                setRegisterValue(instruction.register, getRegisterValue(instruction.register) * getRegisterValue(instruction.multiplier))
-                index++
-            }
-            is ModuloValue -> {
-                setRegisterValue(instruction.register, getRegisterValue(instruction.register) % instruction.divider)
-                index++
-            }
-            is ModuloRegister -> {
-                setRegisterValue(instruction.register, getRegisterValue(instruction.register) % getRegisterValue(instruction.divider))
-                index++
-            }
-            is Recover -> {
-                if (getRegisterValue(instruction.register) > 0) recoveredFrequency = getRegisterValue(instruction.register)
-                index++
-            }
-            is JumpValue -> if (getRegisterValue(instruction.register) > 0) index += instruction.offset.toInt() else index++
-            is JumpRegister -> if (getRegisterValue(instruction.register) > 0) index += getRegisterValue(instruction.offset).toInt() else index++
+            is SetValue -> setRegisterValue(instruction.register, instruction.value)
+            is SetRegister -> setRegisterValue(instruction.register, getRegisterValue(instruction.value))
+            is Sound -> foundFrequency = getRegisterValue(instruction.register)
+            is AddValue -> setRegisterValue(instruction.register, getRegisterValue(instruction.register) + instruction.value)
+            is AddRegister -> setRegisterValue(instruction.register, getRegisterValue(instruction.register) + getRegisterValue(instruction.value))
+            is MultiplyValue -> setRegisterValue(instruction.register, getRegisterValue(instruction.register) * instruction.multiplier)
+            is MultiplyRegister -> setRegisterValue(instruction.register, getRegisterValue(instruction.register) * getRegisterValue(instruction.multiplier))
+            is ModuloValue -> setRegisterValue(instruction.register, getRegisterValue(instruction.register) % instruction.divider)
+            is ModuloRegister -> setRegisterValue(instruction.register, getRegisterValue(instruction.register) % getRegisterValue(instruction.divider))
+            is Recover -> if (getRegisterValue(instruction.register) > 0) recoveredFrequency = getRegisterValue(instruction.register)
+            is JumpValue -> if (getRegisterValue(instruction.register) > 0) index += instruction.offset.toInt() - 1
+            is JumpRegister -> if (getRegisterValue(instruction.register) > 0) index += getRegisterValue(instruction.offset).toInt() - 1
         }
+        index++
     }
 }
 
@@ -131,7 +102,7 @@ data class RealDuet(private val instructions: List<Instruction>,
     fun processInstructions(): CompletableFuture<Long> =
         CompletableFuture.supplyAsync {
             do {
-                instructions.getOrNull(index)?.let {
+                instructions.forEach {
                     processInstruction(it)
                 }
             } while (index in 0 until instructions.size)
@@ -148,43 +119,18 @@ data class RealDuet(private val instructions: List<Instruction>,
 
     private fun processInstruction(instruction: Instruction) {
         when (instruction) {
-            is SetValue -> {
-                setRegisterValue(instruction.register, instruction.value)
-                index++
-            }
-            is SetRegister -> {
-                setRegisterValue(instruction.register, getRegisterValue(instruction.value))
-                index++
-            }
+            is SetValue -> setRegisterValue(instruction.register, instruction.value)
+            is SetRegister -> setRegisterValue(instruction.register, getRegisterValue(instruction.value))
             is Sound -> {
-                index++
                 outgoing.put(getRegisterValue(instruction.register))
                 timesSent += 1
             }
-            is AddValue -> {
-                setRegisterValue(instruction.register, getRegisterValue(instruction.register) + instruction.value)
-                index++
-            }
-            is AddRegister -> {
-                setRegisterValue(instruction.register, getRegisterValue(instruction.register) + getRegisterValue(instruction.value))
-                index++
-            }
-            is MultiplyValue -> {
-                setRegisterValue(instruction.register, getRegisterValue(instruction.register) * instruction.multiplier)
-                index++
-            }
-            is MultiplyRegister -> {
-                setRegisterValue(instruction.register, getRegisterValue(instruction.register) * getRegisterValue(instruction.multiplier))
-                index++
-            }
-            is ModuloValue -> {
-                setRegisterValue(instruction.register, getRegisterValue(instruction.register) % instruction.divider)
-                index++
-            }
-            is ModuloRegister -> {
-                setRegisterValue(instruction.register, getRegisterValue(instruction.register) % getRegisterValue(instruction.divider))
-                index++
-            }
+            is AddValue -> setRegisterValue(instruction.register, getRegisterValue(instruction.register) + instruction.value)
+            is AddRegister -> setRegisterValue(instruction.register, getRegisterValue(instruction.register) + getRegisterValue(instruction.value))
+            is MultiplyValue -> setRegisterValue(instruction.register, getRegisterValue(instruction.register) * instruction.multiplier)
+            is MultiplyRegister -> setRegisterValue(instruction.register, getRegisterValue(instruction.register) * getRegisterValue(instruction.multiplier))
+            is ModuloValue -> setRegisterValue(instruction.register, getRegisterValue(instruction.register) % instruction.divider)
+            is ModuloRegister -> setRegisterValue(instruction.register, getRegisterValue(instruction.register) % getRegisterValue(instruction.divider))
             is Recover -> {
                 try {
                     register[instruction.register] = incoming.poll(1, TimeUnit.SECONDS)
@@ -192,9 +138,10 @@ data class RealDuet(private val instructions: List<Instruction>,
                     index = -2
                 }
             }
-            is JumpValue -> if (getRegisterValue(instruction.register) > 0) index += instruction.offset.toInt() else index++
-            is JumpRegister -> if (getRegisterValue(instruction.register) > 0) index += getRegisterValue(instruction.offset).toInt() else index++
+            is JumpValue -> if (getRegisterValue(instruction.register) > 0) index += instruction.offset.toInt()
+            is JumpRegister -> if (getRegisterValue(instruction.register) > 0) index += getRegisterValue(instruction.offset).toInt()
         }
+        index++
     }
 }
 
