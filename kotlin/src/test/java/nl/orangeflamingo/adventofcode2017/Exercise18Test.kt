@@ -26,6 +26,6 @@ class Exercise18Test {
     @Test
     fun `actual input gold`() {
         val exc18 = Exercise18("/input/input18.txt")
-        assertEquals(0, exc18.goldExercise18())
+        assertEquals(8001, exc18.goldExercise18())
     }
 }

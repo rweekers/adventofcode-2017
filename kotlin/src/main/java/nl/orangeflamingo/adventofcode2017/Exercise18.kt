@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit
 
 class Exercise18(fileName: String) {
 
-    private val instructions: List<Instruction> = parseInput(fileName)
+    private val instructions: List<String> = linesAsList(fileName)
 
     private fun linesAsList(file: String): MutableList<String> {
         val inputStream: InputStream = this.javaClass.getResource(file).openStream()
@@ -28,148 +28,104 @@ class Exercise18(fileName: String) {
         val program0Ingoing = LinkedBlockingDeque<Long>()
         val program1Ingoing = LinkedBlockingDeque<Long>()
 
-        RealDuet(instructions, program1Ingoing, program0Ingoing).processInstructions()
+        RealDuet(instructions, program1Ingoing, program0Ingoing, mutableMapOf("p" to 0L)).processInstructions()
 
-        return RealDuet(instructions, program0Ingoing, program1Ingoing).processInstructions().get()
-    }
-
-    private fun parseInput(file: String): List<Instruction> {
-        val list = linesAsList(file)
-        val regExp2 = """\S+""".toRegex()
-
-        return list.map {
-            val parts = regExp2.findAll(it).toList().map { it.value }
-
-            when (parts[0]) {
-                "set" -> if (parts[2].toLongOrNull() != null) SetValue(parts[1].toFirstChar(), parts[2].toLong()) else SetRegister(parts[1].toFirstChar(), parts[2].toFirstChar())
-                "snd" -> Sound(parts[1].toFirstChar())
-                "add" -> if (parts[2].toLongOrNull() != null) AddValue(parts[1].toFirstChar(), parts[2].toLong()) else AddRegister(parts[1].toFirstChar(), parts[2].toFirstChar())
-                "mul" -> if (parts[2].toLongOrNull() != null) MultiplyValue(parts[1].toFirstChar(), parts[2].toLong()) else MultiplyRegister(parts[1].toFirstChar(), parts[2].toFirstChar())
-                "mod" -> if (parts[2].toLongOrNull() != null) ModuloValue(parts[1].toFirstChar(), parts[2].toLong()) else ModuloRegister(parts[1].toFirstChar(), parts[2].toFirstChar())
-                "rcv" -> Recover(parts[1].toFirstChar())
-                "jgz" -> if (parts[2].toLongOrNull() != null) JumpValue(parts[1].toFirstChar(), parts[2].toLong()) else JumpRegister(parts[1].toFirstChar(), parts[2].toFirstChar())
-                else -> Sound(parts[1].toFirstChar())
-            }
-        }
-    }
-
-    private fun String.toFirstChar(): Char {
-        return this.toCharArray()[0]
+        return RealDuet(instructions, program0Ingoing, program1Ingoing, mutableMapOf("p" to 1L)).processInstructions().get()
     }
 }
 
-data class Duet(private val instructions: List<Instruction>, private val register: MutableMap<Char, Long> = mutableMapOf(), private var index: Int = 0, private var recoveredFrequency: Long = 0, var foundFrequency: Long = 0) {
+data class Duet(private val instructions: List<String>, private val register: MutableMap<String, Long> = mutableMapOf(), private var index: Int = 0, private var recoveredFrequency: Long = 0, var foundFrequency: Long = 0) {
+
     fun processInstructions() {
         while (recoveredFrequency == 0L) {
             processInstruction(instructions[index])
         }
     }
 
-    private fun setRegisterValue(registerKey: Char, value: Long) {
-        register[registerKey] = value
+    private fun getRegisterValue(registerKey: String): Long {
+        return register.getOrElse(registerKey) {
+            try {
+                registerKey.toLong()
+            } catch (e: NumberFormatException) {
+                0
+            }
+        }
     }
 
-    private fun getRegisterValue(registerKey: Char): Long {
-        return register.computeIfAbsent(registerKey, { _ -> 0 })
-    }
+    private fun processInstruction(instruction: String) {
+        val parts = instruction.split(" ")
 
-    private fun processInstruction(instruction: Instruction) {
-        when (instruction) {
-            is SetValue -> setRegisterValue(instruction.register, instruction.value)
-            is SetRegister -> setRegisterValue(instruction.register, getRegisterValue(instruction.value))
-            is Sound -> foundFrequency = getRegisterValue(instruction.register)
-            is AddValue -> setRegisterValue(instruction.register, getRegisterValue(instruction.register) + instruction.value)
-            is AddRegister -> setRegisterValue(instruction.register, getRegisterValue(instruction.register) + getRegisterValue(instruction.value))
-            is MultiplyValue -> setRegisterValue(instruction.register, getRegisterValue(instruction.register) * instruction.multiplier)
-            is MultiplyRegister -> setRegisterValue(instruction.register, getRegisterValue(instruction.register) * getRegisterValue(instruction.multiplier))
-            is ModuloValue -> setRegisterValue(instruction.register, getRegisterValue(instruction.register) % instruction.divider)
-            is ModuloRegister -> setRegisterValue(instruction.register, getRegisterValue(instruction.register) % getRegisterValue(instruction.divider))
-            is Recover -> if (getRegisterValue(instruction.register) > 0) recoveredFrequency = getRegisterValue(instruction.register)
-            is JumpValue -> if (getRegisterValue(instruction.register) > 0) index += instruction.offset.toInt() - 1
-            is JumpRegister -> if (getRegisterValue(instruction.register) > 0) index += getRegisterValue(instruction.offset).toInt() - 1
+        when (parts[0]) {
+            "snd" -> foundFrequency = getRegisterValue(parts[1])
+            "set" -> register[parts[1]] = getRegisterValue(parts[2])
+            "add" -> register[parts[1]] = getRegisterValue(parts[1]) + getRegisterValue(parts[2])
+            "mul" -> register[parts[1]] = getRegisterValue(parts[1]) * getRegisterValue(parts[2])
+            "mod" -> register[parts[1]] = getRegisterValue(parts[1]) % getRegisterValue(parts[2])
+            "rcv" -> if (getRegisterValue(parts[1]) != 0L) {
+                recoveredFrequency = foundFrequency
+            }
+            "jgz" -> if (getRegisterValue(parts[1]) > 0L) {
+                index += getRegisterValue(parts[2]).toInt().dec()
+            }
         }
         index++
     }
 }
 
-data class RealDuet(private val instructions: List<Instruction>,
+data class RealDuet(private val instructions: List<String> = mutableListOf(),
                     private val incoming: BlockingQueue<Long>,
                     private val outgoing: BlockingQueue<Long>,
-                    private val register: MutableMap<Char, Long> = mutableMapOf(),
+                    private val register: MutableMap<String, Long> = mutableMapOf(),
                     private var index: Int = 0,
                     private var timesSent: Long = 0) {
 
     fun processInstructions(): CompletableFuture<Long> =
-        CompletableFuture.supplyAsync {
-            do {
-                instructions.forEach {
-                    processInstruction(it)
-                }
-            } while (index in 0 until instructions.size)
-            timesSent
+            CompletableFuture.supplyAsync {
+                do {
+                    instructions.getOrNull(index)?.let {
+                        processInstruction(it)
+                    }
+                } while (index in 0 until instructions.size)
+                timesSent
+            }
+
+    private fun getRegisterValue(registerKey: String): Long {
+        return register.getOrElse(registerKey) {
+            try {
+                registerKey.toLong()
+            } catch (e: NumberFormatException) {
+                0
+            }
         }
-
-    private fun setRegisterValue(registerKey: Char, value: Long) {
-        register[registerKey] = value
     }
 
-    private fun getRegisterValue(registerKey: Char): Long {
-        return register.computeIfAbsent(registerKey, { _ -> 0 })
-    }
+    private fun processInstruction(instruction: String) {
+        val parts = instruction.split(" ")
 
-    private fun processInstruction(instruction: Instruction) {
-        when (instruction) {
-            is SetValue -> setRegisterValue(instruction.register, instruction.value)
-            is SetRegister -> setRegisterValue(instruction.register, getRegisterValue(instruction.value))
-            is Sound -> {
-                outgoing.put(getRegisterValue(instruction.register))
+        when (parts[0]) {
+            "snd" -> {
+                outgoing.put(getRegisterValue(parts[1]))
                 timesSent += 1
             }
-            is AddValue -> setRegisterValue(instruction.register, getRegisterValue(instruction.register) + instruction.value)
-            is AddRegister -> setRegisterValue(instruction.register, getRegisterValue(instruction.register) + getRegisterValue(instruction.value))
-            is MultiplyValue -> setRegisterValue(instruction.register, getRegisterValue(instruction.register) * instruction.multiplier)
-            is MultiplyRegister -> setRegisterValue(instruction.register, getRegisterValue(instruction.register) * getRegisterValue(instruction.multiplier))
-            is ModuloValue -> setRegisterValue(instruction.register, getRegisterValue(instruction.register) % instruction.divider)
-            is ModuloRegister -> setRegisterValue(instruction.register, getRegisterValue(instruction.register) % getRegisterValue(instruction.divider))
-            is Recover -> {
+            "set" -> register[parts[1]] = getRegisterValue(parts[2])
+            "add" -> register[parts[1]] = getRegisterValue(parts[1]) + getRegisterValue(parts[2])
+            "mul" -> register[parts[1]] = getRegisterValue(parts[1]) * getRegisterValue(parts[2])
+            "mod" -> register[parts[1]] = getRegisterValue(parts[1]) % getRegisterValue(parts[2])
+            "rcv" ->
                 try {
-                    register[instruction.register] = incoming.poll(1, TimeUnit.SECONDS)
+                    register[parts[1]] = incoming.poll(1, TimeUnit.SECONDS)
                 } catch (e: Exception) {
                     index = -2
                 }
-            }
-            is JumpValue -> if (getRegisterValue(instruction.register) > 0) index += instruction.offset.toInt()
-            is JumpRegister -> if (getRegisterValue(instruction.register) > 0) index += getRegisterValue(instruction.offset).toInt()
+            "jgz" ->
+                if (getRegisterValue(parts[1]) > 0L) {
+                    index += getRegisterValue(parts[2]).toInt().dec()
+                }
+            else -> throw IllegalArgumentException("No such instruction ${parts[0]}")
         }
-        index++
+        index += 1
     }
 }
-
-sealed class Instruction
-
-class SetValue(val register: Char, val value: Long) : Instruction()
-
-class SetRegister(val register: Char, val value: Char) : Instruction()
-
-class Sound(val register: Char) : Instruction()
-
-class AddValue(val register: Char, val value: Long) : Instruction()
-
-class AddRegister(val register: Char, val value: Char) : Instruction()
-
-class MultiplyValue(val register: Char, val multiplier: Long) : Instruction()
-
-class MultiplyRegister(val register: Char, val multiplier: Char) : Instruction()
-
-class ModuloValue(val register: Char, val divider: Long) : Instruction()
-
-class ModuloRegister(val register: Char, val divider: Char) : Instruction()
-
-class Recover(val register: Char) : Instruction()
-
-class JumpValue(val register: Char, val offset: Long) : Instruction()
-
-class JumpRegister(val register: Char, val offset: Char) : Instruction()
 
 fun main(args: Array<String>) {
     val exc18Silver = Exercise18("/input/input18.txt")
