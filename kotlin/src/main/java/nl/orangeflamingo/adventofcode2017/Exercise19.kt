@@ -1,10 +1,6 @@
 package nl.orangeflamingo.adventofcode2017
 
 import java.io.InputStream
-import java.util.concurrent.BlockingQueue
-import java.util.concurrent.CompletableFuture
-import java.util.concurrent.LinkedBlockingDeque
-import java.util.concurrent.TimeUnit
 
 class Exercise19(fileName: String) {
 
