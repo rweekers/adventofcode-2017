@@ -21,17 +21,31 @@ class Exercise19(fileName: String) {
     private tailrec fun move(location: Tube,
                              direction: Direction,
                              visitedChars: List<Char> = emptyList()): String =
-            if (grid[location.x][location.y] == ' ') visitedChars.joinToString("")
+            if (charAt(location.x, location.y, grid) == ' ') visitedChars.joinToString("")
             else {
-                when (grid[location.x][location.y]) {
-                    in 'A'..'Z' -> move(location.move(direction), direction, visitedChars + grid[location.x][location.y])
+                when (charAt(location.x, location.y, grid)) {
+                    in 'A'..'Z' -> move(location.move(direction), direction, visitedChars + charAt(location.x, location.y, grid))
                     '+' -> {
-                        // TODO implement turning
-                        move(location, direction, visitedChars)
+                        val newDirection = turn(location, direction)
+                        move(location.move(newDirection), newDirection, visitedChars)
                     }
                     else -> move(location.move(direction), direction, visitedChars)
                 }
             }
+
+    private fun charAt(x: Int, y: Int, grid: List<CharArray>): Char {
+        if (x >= grid.get(0).size || y >= grid.size) return ' '
+        return grid[y][x]
+    }
+
+    private fun turn(location: Tube, direction: Direction): Direction {
+        return direction.perpendicularDirections()
+                .filter {
+                    val loc = location.move(it)
+                    charAt(loc.x, loc.y, grid) != ' '
+                }
+                .first()
+    }
 
     fun main(args: Array<String>) {
         val exc19Silver = Exercise19("/input/input19.txt")
@@ -50,6 +64,13 @@ class Exercise19(fileName: String) {
     }
 
     enum class Direction(val axis: String) {
-        UP("Y"), DOWN("Y"), LEFT("X"), RIGHT("X")
+        UP("Y"), DOWN("Y"), LEFT("X"), RIGHT("X");
+
+        fun perpendicularDirections(): List<Direction> {
+            if (this.axis == "X") {
+                return listOf(UP, DOWN)
+            }
+            return listOf(LEFT, RIGHT)
+        }
     }
 }
