@@ -8,7 +8,6 @@ class Exercise22(fileName: String) {
     private val grid = parseInput(input)
     private var current = Coordinate(input.size / 2, input.first().length / 2)
 
-    private val directions = listOf(Coordinate(0, -1), Coordinate(1, 0), Coordinate(0, 1), Coordinate(-1, 0))
     private var pointing = 0
 
     private fun left(): Int =
@@ -38,6 +37,15 @@ class Exercise22(fileName: String) {
         return destination
     }
 
+    private fun move(): Coordinate =
+            when (pointing) {
+                0 -> current.up()
+                1 -> current.right()
+                2 -> current.down()
+                3 -> current.left()
+                else -> throw RuntimeException("No correct pointing value")
+            }
+
     fun silverExercise22(iterations: Int = 10000): Int {
         var infectionsCaused = 0
         repeat(iterations) {
@@ -49,7 +57,7 @@ class Exercise22(fileName: String) {
                 grid[current] = NodeState.Clean
                 pointing = right()
             }
-            current += directions[pointing]
+            current = move()
         }
         return infectionsCaused
     }
@@ -75,7 +83,7 @@ class Exercise22(fileName: String) {
                     grid[current] = NodeState.Clean
                 }
             }
-            current += directions[pointing]
+            current = move()
         }
         return infectionsCaused
     }
@@ -91,8 +99,10 @@ fun main(args: Array<String>) {
 }
 
 data class Coordinate(val x: Int, val y: Int) {
-    operator fun plus(that: Coordinate): Coordinate =
-            Coordinate(x + that.x, y + that.y)
+    fun left(): Coordinate = Coordinate(x - 1, y)
+    fun right(): Coordinate = Coordinate(x + 1, y)
+    fun up(): Coordinate = Coordinate(x, y - 1)
+    fun down(): Coordinate = Coordinate(x, y + 1)
 }
 
 enum class NodeState {
