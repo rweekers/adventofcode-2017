@@ -1,5 +1,6 @@
 package nl.orangeflamingo.adventofcode2017
 
+import io.reactivex.rxkotlin.toObservable
 import java.io.InputStream
 
 class Exercise24(fileName: String) {
@@ -35,14 +36,22 @@ class Exercise24(fileName: String) {
     }
 
     fun silverExercise24(): Int {
-        return makeBridges(components).maxBy { it.sumBy { it.strength } }?.sumBy { it.strength }!!
+        return makeBridges(components).toObservable().reduce{ acc, curr -> if(curr.sumBy { it.strength } > acc.sumBy { it.strength }) curr else acc}.map{ x -> x.sumBy { it.strength }}.blockingGet()
     }
 
     fun goldExercise24(): Int {
-        return makeBridges(components)
+        val answer = makeBridges(components).toObservable()
+                .reduce { acc, curr -> if (curr.size > acc.size) curr else acc }
+                .map { x -> x.sumBy { it.strength } }.blockingGet()
+
+        val answer2 = makeBridges(components)
                 .maxWith(
                         compareBy({ it.size }, { it.sumBy { it.strength } })
                 )?.sumBy { it.strength }!!
+
+        println("Gold answer reactive is $answer and answer functional is $answer2")
+
+        return answer2
     }
 }
 
