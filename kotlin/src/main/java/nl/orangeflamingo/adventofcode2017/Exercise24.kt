@@ -40,18 +40,15 @@ class Exercise24(fileName: String) {
     }
 
     fun goldExercise24(): Int {
-        val answer = makeBridges(components).toObservable()
-                .reduce { acc, curr -> if (curr.size > acc.size) curr else acc }
+        return makeBridges(components).toObservable()
+                .reduce { acc, curr -> if (curr.largerThan(acc)) curr else acc }
                 .map { x -> x.sumBy { it.strength } }.blockingGet()
+    }
 
-        val answer2 = makeBridges(components)
-                .maxWith(
-                        compareBy({ it.size }, { it.sumBy { it.strength } })
-                )?.sumBy { it.strength }!!
-
-        println("Gold answer reactive is $answer and answer functional is $answer2")
-
-        return answer2
+    private fun List<Component>.largerThan(other: List<Component>): Boolean {
+        if (this.size > other.size) return true
+        if (this.size == other.size) return this.sumBy { it.strength } > other.sumBy { it.strength }
+        return false
     }
 }
 
