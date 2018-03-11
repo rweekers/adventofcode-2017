@@ -18,29 +18,23 @@ class Exercise24(fileName: String) {
         return lineList
     }
 
-    private fun makeBridges(components: List<Component>,
-                            bridge: List<Component> = emptyList(),
-                            port: Int = 0): List<List<Component>> {
-        val compatible = components.filter { it.canLink(port) }
-        return when (compatible.size) {
-            0 -> listOf(bridge)
-            else ->
-                compatible.flatMap { pick ->
-                    makeBridges(
-                            components - pick,
-                            bridge + pick,
-                            pick.opposite(port)
-                    )
-                }
+    private fun possibleBridges(components: List<Component>,
+                                bridge: List<Component> = emptyList(),
+                                port: Int = 0): List<List<Component>> {
+        val compatibleParts = components.filter { it.canLinkTo(port) }
+        return when (compatibleParts.isEmpty()) {
+            true -> listOf(bridge)
+            false -> compatibleParts
+                    .flatMap { candidate -> possibleBridges(components - candidate, bridge + candidate, candidate.oppositePort(port)) }
         }
     }
 
     fun silverExercise24(): Int {
-        return makeBridges(components).toObservable().reduce{ acc, curr -> if(curr.sumBy { it.strength } > acc.sumBy { it.strength }) curr else acc}.map{ x -> x.sumBy { it.strength }}.blockingGet()
+        return possibleBridges(components).toObservable().reduce { acc, curr -> if (curr.sumBy { it.strength } > acc.sumBy { it.strength }) curr else acc }.map { x -> x.sumBy { it.strength } }.blockingGet()
     }
 
     fun goldExercise24(): Int {
-        return makeBridges(components).toObservable()
+        return possibleBridges(components).toObservable()
                 .reduce { acc, curr -> if (curr.largerThan(acc)) curr else acc }
                 .map { x -> x.sumBy { it.strength } }.blockingGet()
     }
@@ -55,11 +49,11 @@ class Exercise24(fileName: String) {
 data class Component(private val portA: Int, private val portB: Int) {
     val strength = portA + portB
 
-    fun canLink(port: Int): Boolean {
+    fun canLinkTo(port: Int): Boolean {
         return portA == port || portB == port
     }
 
-    fun opposite(port: Int): Int {
+    fun oppositePort(port: Int): Int {
         return if (port == portA) portB else portA
     }
 }
