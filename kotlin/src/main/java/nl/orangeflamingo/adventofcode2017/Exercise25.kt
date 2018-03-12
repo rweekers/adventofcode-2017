@@ -4,10 +4,13 @@ import java.io.InputStream
 
 class Exercise25(fileName: String) {
 
-    private val lines = parseInput(linesAsList(fileName))
+    private val lines = linesAsList(fileName)
+    val initialState = lines.first()[15]
+    val steps = lines[1].split(" ")[5].toInt()
 
-    private fun parseInput(input: List<String>): List<String> =
-            input
+    private fun parseInput(input: List<String>): List<String> {
+        return input
+    }
 
     private fun linesAsList(file: String): MutableList<String> {
         val inputStream: InputStream = this.javaClass.getResource(file).openStream()
