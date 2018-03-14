@@ -17,7 +17,7 @@ class Exercise25(fileName: String) {
                 listOf<Rule>(
                 Rule(it[0], it[1].toInt(), it[2].toInt(), it[3], it[4]),
                 Rule(it[0], it[5].toInt(), it[6].toInt(), it[7], it[8]))
-            }
+            }.flatten()
 
     private fun parseInput(input: List<String>): List<String> {
         return input
