@@ -8,6 +8,17 @@ class Exercise25(fileName: String) {
     val initialState = lines.first()[15]
     val steps = lines[1].split(" ")[5].toInt()
 
+    val ruleMap = lines
+            .filter { it.isNotBlank() }
+            .drop(2)
+            .map { it.split(" ").last().dropLast(1) }
+            .chunked(9)
+            .map {
+                listOf<Rule>(
+                Rule(it[0], it[1].toInt(), it[2].toInt(), it[3], it[4]),
+                Rule(it[0], it[5].toInt(), it[6].toInt(), it[7], it[8]))
+            }
+
     private fun parseInput(input: List<String>): List<String> {
         return input
     }
@@ -28,6 +39,9 @@ class Exercise25(fileName: String) {
         return 0
     }
 }
+
+class Rule(val state: String, val req: Int, val value: Int, val action: String, val nextState: String)
+class MachineState(val zero: Rule, val one: Rule)
 
 fun main(args: Array<String>) {
     val exc25Silver = Exercise25("/input/input25.txt")
